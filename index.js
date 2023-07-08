@@ -1,11 +1,12 @@
+//node服务端根目录
 const express = require('express');
 const bodyParser = require('body-parser');
-
+//导入解析包和express框架
 const app = express();
 
 app.use(bodyParser.json());
 
-
+//利用cors方式解决跨域问题（本地）
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
@@ -13,9 +14,10 @@ app.use((req, res, next) => {
   next();
 });
 
-const articlesRouter = require('./routes/articles');
-const chatsRouter = require('./routes/chats');
-const commentsRouter = require('./routes/comments')
+//导入路由管理，并进行注册
+const articlesRouter = require('./routes/articles');//文章信息
+const chatsRouter = require('./routes/chats');//留言信息
+const commentsRouter = require('./routes/comments')//评论信息
 
 
 app.use('/articles', articlesRouter);

@@ -1,5 +1,6 @@
 const chatModel = require('../models/chatModel');
 
+//获取所有留言的逻辑处理
 const getAllChats = async (req, res) => {
   try {
     const chats = await chatModel.getAllChats();
