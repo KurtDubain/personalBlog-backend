@@ -1,3 +1,32 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+
+const app = express();
+
+app.use(bodyParser.json());
+
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
+const articlesRouter = require('./routes/articles');
+const chatsRouter = require('./routes/chats');
+const commentsRouter = require('./routes/comments')
+
+
+app.use('/articles', articlesRouter);
+app.use('/chats', chatsRouter);
+app.use('/comments', commentsRouter);
+
+app.listen(3000, () => {
+  console.log('端口3000，启动！');
+});
+
+
 // const express = require('express')
 // const mysql = require('mysql2')
 // const bodyParser = require('body-parser')
@@ -207,30 +236,3 @@
 // app.listen(3000,()=>{
 //     console.log('端口3000，启动！')
 // })
-const express = require('express');
-const bodyParser = require('body-parser');
-
-const app = express();
-
-app.use(bodyParser.json());
-
-
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
-
-const articlesRouter = require('./routes/articles');
-const chatsRouter = require('./routes/chats');
-const commentsRouter = require('./routes/comments')
-
-
-app.use('/articles', articlesRouter);
-app.use('/chats', chatsRouter);
-app.use('/comments', commentsRouter);
-
-app.listen(3000, () => {
-  console.log('Server started on port 3000');
-});

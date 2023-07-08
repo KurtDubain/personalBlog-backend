@@ -52,6 +52,7 @@ const getArticleCtlTitles = async(req,res)=>{
 const getLastId = async(req,res)=>{
   try {
     const lastId = await articleModel.getLastId();
+    console.log('最后一个id查询成功',lastId)
     res.json(lastId);
   } catch (error) {
     console.error('最后一个标题获取失败:', error);

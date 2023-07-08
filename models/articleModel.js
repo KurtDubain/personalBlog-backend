@@ -57,7 +57,7 @@ const getArticleCtlTitles=(articleId)=>{
           title:row.title,
 
         }));
-        console.log(ctlTitles)
+        // console.log(ctlTitles)
         resolve(ctlTitles);
       }
     });
@@ -72,15 +72,9 @@ const getLastId = () => {
         console.error('最后一个文章号检索查询失败');
         reject(err);
       } else {
-        if (results.length > 0) {
-          const lastId = results[0].id;
-        
-        console.log('最后一个文章号检索查询成功');
-        
-        resolve(lastId);}
-        else{
-          resolve(null)
-        }
+          const lastId = results[0].id
+          console.log('最后一个文章号检索查询成功',lastId);
+          resolve(lastId);
       }
     });
   });
