@@ -1,6 +1,8 @@
 const mysql = require('mysql2');
 
+// 数据库部分的配置
 
+// 数据库的连接的创建
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
