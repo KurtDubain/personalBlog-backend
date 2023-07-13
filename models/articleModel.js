@@ -16,8 +16,9 @@ const getAllArticles = () => {
           id: row.id,
           title: row.title,
           date: moment(row.date).format('YYYY-MM-DD HH:mm'),
-          tags: row.tags,
+          tags: row.tags.tags,
         }));
+        console.log(articlesData)
         resolve(articlesData);
       }
     });
@@ -36,7 +37,7 @@ const getArticleById = (articleId) => {
         console.log('指定文章查询成功');
         //使用map处理生成数组对象，使用moment生成指定格式
         const article = results.map(row => ({
-          tags: row.tags,
+          tags: row.tags.tags,
           commentsNum: row.commentsNum,
           title: row.title,
           date: moment(row.date).format('YYYY-MM-DD HH:mm'),

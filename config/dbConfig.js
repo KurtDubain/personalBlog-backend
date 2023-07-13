@@ -10,6 +10,8 @@ const connection = mysql.createConnection({
   database: 'blog',
 });
 
+// const connection = pool.promise()
+
 connection.connect((err) => {
   if (err) {
     console.error('数据库连接失败');
