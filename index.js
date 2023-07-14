@@ -18,11 +18,13 @@ app.use((req, res, next) => {
 const articlesRouter = require('./routes/articles');//文章信息
 const chatsRouter = require('./routes/chats');//留言信息
 const commentsRouter = require('./routes/comments')//评论信息
+const usersRouter = require('./routes/users')
 
 
 app.use('/articles', articlesRouter);
 app.use('/chats', chatsRouter);
 app.use('/comments', commentsRouter);
+app.use('/users',usersRouter)
 
 app.listen(3000, () => {
   console.log('端口3000，启动！');
