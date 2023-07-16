@@ -15,20 +15,18 @@ const imageUpload = async(req,res)=>{
     const imageUrl = await chatModel.imageUpload(req.file)
     res.json({imageUrl})
   }catch(error){
-    console.error('图片上传失败');
+    console.error('图片上传失败',error);
     res.status(500).json({error:'图片未能成功上传'})
   }
 }
 
 const formUpload = async (req,res)=>{
-  const content = req.body.content
-  const image = req.body.image
   try{  
-    await chatModel.formUpload(content,image)
+    await chatModel.FormUpload(req.body)
     res.json({success:true})
     
   }catch(error){
-    console.error('留言表单发送失败');
+    console.error(error);
     res.status(500).json({error:'留言表单发送失败'})
   }
 }
