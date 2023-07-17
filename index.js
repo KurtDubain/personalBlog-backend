@@ -1,6 +1,7 @@
 //node服务端根目录
 const express = require('express');
 const bodyParser = require('body-parser');
+const path = require('path')
 //导入解析包和express框架
 const app = express();
 
@@ -20,6 +21,7 @@ const chatsRouter = require('./routes/chats');//留言信息
 const commentsRouter = require('./routes/comments')//评论信息
 const usersRouter = require('./routes/users')
 
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 app.use('/articles', articlesRouter);
 app.use('/chats', chatsRouter);

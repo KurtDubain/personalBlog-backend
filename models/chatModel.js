@@ -7,20 +7,25 @@ const path = require('path');
 const getAllChats = () => {
   return new Promise((resolve, reject) => {
     //SQL语句查询全部留言
-    const query = 'SELECT id, name, date, content, contact FROM chats';
+    const query = 'SELECT id, username, date, content, account,likes,views,reply,user_id,imgUrl FROM chats';
     db.query(query,(err, results) => {
       if (err) {
         console.error('所有留言查询失败');
-        reject(err);
+        reject(err)  
       } else {
         console.log('所有留言查询成功');
         //使用map生成数组对象，并使用moment来修改日期格式
         const chatsData = results.map(row => ({
           id: row.id,
-          name: row.name,
+          username: row.username,
           date: moment(row.date).format('YYYY-MM-DD HH:mm'),
           content: row.content,
-          contact: row.contact,
+          account: row.account,
+          likes:row.likes,
+          views:row.views,
+          reply:row.reply,
+          user_id:row.user_id,
+          imgUrl:row.imgUrl
         }));
         resolve(chatsData);
       }
@@ -30,9 +35,10 @@ const getAllChats = () => {
 const imageUpload = (imageFile)=>{
   return new Promise ((resolve,reject)=>{
     const savePath = path.join(__dirname,'../assets/imageUpload',imageFile.filename)
+    const publicUrl = `http://localhost:3000/assets/imageUpload/${imageFile.filename}`
     fs.promises.rename(imageFile.path,savePath)
       .then(()=>{
-        resolve(savePath)
+        resolve(publicUrl)
       })
       .catch((error)=>{
         console.error('!!!');
@@ -45,7 +51,7 @@ const FormUpload = (chatFrom)=>{
   
   const query = 'insert into chats (username,date,content,account,likes,views,reply,user_id,imgUrl) values(?,?,?,?,?,?,?,?,?)';
 
-    db.query(query,[chatFrom.username,new Date(),chatFrom.content,chatFrom.account,1,1,0,chatFrom.uid,chatFrom.imgUrl], (err, results) => {
+    db.query(query,[chatFrom.username,new Date(),chatFrom.content,chatFrom.account,1,1,0,chatFrom.uid,chatFrom.image], (err, results) => {
       if (err) {
         console.error('表单提交失败');
         reject(err);
