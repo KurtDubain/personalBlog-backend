@@ -7,5 +7,7 @@ const imageUpload = require('../middlewares/imageUpload')
 router.get('/', chatsController.getAllChats);
 router.post('/imageUpload',imageUpload.single('file'),chatsController.imageUpload)
 router.post('/FormUpload',chatsController.formUpload)
+router.get('/chatInfo/:chatId',chatsController.getChatInfo)
+router.get('/chatCommentInfo/:chatId',chatsController.getChatCommentInfo)
 
 module.exports = router;

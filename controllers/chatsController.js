@@ -31,10 +31,36 @@ const formUpload = async (req,res)=>{
   }
 }
 
+const getChatInfo = async(req,res)=>{
+  const chatId = req.params.chatId
+  try{
+    const ChatInfo = await chatModel.getChatInfo(chatId)
+    res.json(ChatInfo);
+  }catch(error){
+    console.error('获取指定留言失败');
+    res.status(500).json({error:'获取指定留言失败'})
+
+  }
+}
+const getChatCommentInfo = async(req,res)=>{
+  const chatId = req.params.chatId
+
+  try{
+    const ChatCommentInfo = await chatModel.getCommentInfo(chatId)
+    res.json(ChatCommentInfo);
+  }catch(error){
+    console.error('获取指定留言下的评论失败');
+    res.status(500).json({error:'获取指定留言下的评论失败'})
+
+  }
+
+}
 
 
 module.exports = {
   getAllChats,
   formUpload,
-  imageUpload
+  imageUpload,
+  getChatInfo,
+  getChatCommentInfo
 };

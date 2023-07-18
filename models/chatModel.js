@@ -2,6 +2,7 @@ const db = require('../config/dbConfig');
 const moment = require('moment');
 const fs = require('fs')
 const path = require('path');
+const { resolve } = require('path');
 
 //获取全部留言的操作
 const getAllChats = () => {
@@ -62,10 +63,61 @@ const FormUpload = (chatFrom)=>{
     });
   });
 }
-
+const getChatInfo = (chatId)=>{
+  return new Promise((resolve,reject)=>{
+    const query = 'SELECT username, id, account,content, user_id, likes,views,reply,imgUrl, date FROM chats WHERE id = ?';
+    db.query(query, [chatId], (err, results) => {
+      if (err) {
+        console.error('指定留言查询失败');
+        reject(err);
+      } else {
+        console.log('指定文章查询成功');
+        //使用map处理生成数组对象，使用moment生成指定格式
+        const ChatInfo = results.map(row => ({
+          id: row.id,
+          username: row.username,
+          account: row.account,
+          content:row.content,
+          date: moment(row.date).format('YYYY-MM-DD HH:mm'),
+          likes: row.likes,
+          views: row.views,
+          reply:row.reply,
+          uid:row.user_id,
+          imgUrl:row.imgUrl
+        }));
+        resolve(ChatInfo);
+      }
+    });
+  })
+}
+const getChatCommentInfo = (chatId)=>{
+  return new Promise((resolve,reject)=>{
+    const query = 'SELECT id, uid, cid, likes, created_at, content FROM chatComments WHERE cid = ?';
+    db.query(query, [chatId], (err, results) => {
+      if (err) {
+        console.error('指定文章查询失败');
+        reject(err);
+      } else {
+        console.log('指定文章查询成功');
+        //使用map处理生成数组对象，使用moment生成指定格式
+        const ChatCommentInfo = results.map(row => ({
+          id: row.id,
+          uid: row.uid,
+          date: moment(row.created_at).format('YYYY-MM-DD HH:mm'),
+          likes: row.likes,
+          content: row.content,
+          cid:row.cid
+        }));
+        resolve(ChatCommentInfo);
+      }
+    });
+  })
+}
 
 module.exports = {
   getAllChats,
   FormUpload,
-  imageUpload
+  imageUpload,
+  getChatInfo,
+  getChatCommentInfo
 };
