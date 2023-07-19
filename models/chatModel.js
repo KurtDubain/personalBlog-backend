@@ -2,7 +2,6 @@ const db = require('../config/dbConfig');
 const moment = require('moment');
 const fs = require('fs')
 const path = require('path');
-const { resolve } = require('path');
 
 //获取全部留言的操作
 const getAllChats = () => {
@@ -92,7 +91,7 @@ const getChatInfo = (chatId)=>{
 }
 const getChatCommentInfo = (chatId)=>{
   return new Promise((resolve,reject)=>{
-    const query = 'SELECT id, uid, cid, likes, created_at, content FROM chatComments WHERE cid = ?';
+    const query = 'SELECT chatComments.id, chatComments.uid, chatComments.cid, chatComments.likes, chatComments.created_at, chatComments.content, users.username FROM chatComments LEFT JOIN users ON chatComments.uid = users.id WHERE chatComments.cid = ?';
     db.query(query, [chatId], (err, results) => {
       if (err) {
         console.error('指定文章查询失败');
@@ -101,6 +100,7 @@ const getChatCommentInfo = (chatId)=>{
         console.log('指定文章查询成功');
         //使用map处理生成数组对象，使用moment生成指定格式
         const ChatCommentInfo = results.map(row => ({
+          username:row.username,
           id: row.id,
           uid: row.uid,
           date: moment(row.created_at).format('YYYY-MM-DD HH:mm'),
@@ -114,10 +114,35 @@ const getChatCommentInfo = (chatId)=>{
   })
 }
 
+const postChatComment = (commentForm)=>{
+  return new Promise((resolve,reject)=>{
+    console.log(commentForm)
+    const uidQuery = 'select id from users where username = ?'
+    const uidParams = [commentForm.username]
+    db.promise().query(uidQuery,uidParams)
+      .then(([uidRows])=>{
+        const ChatCommentQuery = 'insert into chatcomments (uid,cid,content,likes,created_at) values(?,?,?,?,?)'
+        const ChatCommentParams = [uidRows[0].id,commentForm.chatId,commentForm.content,1,new Date()]
+        db.promise().query(ChatCommentQuery,ChatCommentParams)
+          .then(()=>{
+            resolve('评论插入成功')
+          })
+          .catch((error)=>{
+            reject('插入评论的时候发生了错误',error)
+          })
+      })
+      .catch((error)=>{
+        reject('用户查询失败',error)
+      })
+
+    })
+}
+
 module.exports = {
   getAllChats,
   FormUpload,
   imageUpload,
   getChatInfo,
-  getChatCommentInfo
+  getChatCommentInfo,
+  postChatComment
 };

@@ -46,21 +46,30 @@ const getChatCommentInfo = async(req,res)=>{
   const chatId = req.params.chatId
 
   try{
-    const ChatCommentInfo = await chatModel.getCommentInfo(chatId)
+    const ChatCommentInfo = await chatModel.getChatCommentInfo(chatId)
     res.json(ChatCommentInfo);
   }catch(error){
-    console.error('获取指定留言下的评论失败');
+    console.error('获取指定留言下的评论失败',error);
     res.status(500).json({error:'获取指定留言下的评论失败'})
 
   }
 
 }
-
+const postChatComment = async(req,res)=>{
+  try{
+    await chatModel.postChatComment(req.body)
+    res.json({success:true})
+  }catch(error){
+    console.error('留言评论表单发送失败',error);
+    res.status(500).json({error:'留言评论表单发送失败'})
+  }
+}
 
 module.exports = {
   getAllChats,
   formUpload,
   imageUpload,
   getChatInfo,
-  getChatCommentInfo
+  getChatCommentInfo,
+  postChatComment
 };

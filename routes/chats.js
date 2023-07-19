@@ -9,5 +9,6 @@ router.post('/imageUpload',imageUpload.single('file'),chatsController.imageUploa
 router.post('/FormUpload',chatsController.formUpload)
 router.get('/chatInfo/:chatId',chatsController.getChatInfo)
 router.get('/chatCommentInfo/:chatId',chatsController.getChatCommentInfo)
+router.post('/postChatComment',chatsController.postChatComment)
 
 module.exports = router;
