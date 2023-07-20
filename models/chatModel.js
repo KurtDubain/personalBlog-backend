@@ -70,7 +70,7 @@ const getChatInfo = (chatId)=>{
         console.error('指定留言查询失败');
         reject(err);
       } else {
-        console.log('指定文章查询成功');
+        console.log('指定文章查询成功',results);
         //使用map处理生成数组对象，使用moment生成指定格式
         const ChatInfo = results.map(row => ({
           id: row.id,
@@ -97,7 +97,7 @@ const getChatCommentInfo = (chatId)=>{
         console.error('指定文章查询失败');
         reject(err);
       } else {
-        console.log('指定文章查询成功');
+        console.log('指定文章查询成功',results);
         //使用map处理生成数组对象，使用moment生成指定格式
         const ChatCommentInfo = results.map(row => ({
           username:row.username,
