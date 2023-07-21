@@ -32,6 +32,8 @@ const getAllChats = () => {
     });
   });
 };
+
+// 保存图片的信息至服务端，并且返回一个Http格式的URL给前端，用于显示
 const imageUpload = (imageFile)=>{
   return new Promise ((resolve,reject)=>{
     const savePath = path.join(__dirname,'../assets/imageUpload',imageFile.filename)
@@ -46,6 +48,7 @@ const imageUpload = (imageFile)=>{
       })
   })
 }
+// 留言表单数据的插入
 const FormUpload = (chatFrom)=>{
   return new Promise((resolve,reject)=>{
   
@@ -62,6 +65,7 @@ const FormUpload = (chatFrom)=>{
     });
   });
 }
+// 获取指定留言的所有信息
 const getChatInfo = (chatId)=>{
   return new Promise((resolve,reject)=>{
     const query = 'SELECT username, id, account,content, user_id, likes,views,reply,imgUrl, date FROM chats WHERE id = ?';
@@ -89,6 +93,7 @@ const getChatInfo = (chatId)=>{
     });
   })
 }
+// 获取指定留言下的评论信息
 const getChatCommentInfo = (chatId)=>{
   return new Promise((resolve,reject)=>{
     const query = 'SELECT chatComments.id, chatComments.uid, chatComments.cid, chatComments.likes, chatComments.created_at, chatComments.content, users.username FROM chatComments LEFT JOIN users ON chatComments.uid = users.id WHERE chatComments.cid = ?';
@@ -113,7 +118,7 @@ const getChatCommentInfo = (chatId)=>{
     });
   })
 }
-
+// 指定留言下的评论的表单的插入
 const postChatComment = (commentForm)=>{
   return new Promise((resolve,reject)=>{
     console.log(commentForm)

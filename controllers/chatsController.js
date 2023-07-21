@@ -10,6 +10,7 @@ const getAllChats = async (req, res) => {
     res.status(500).json({ error: '未能获取留言信息' });
   }
 };
+// 留言表单中图片URL的上传保存
 const imageUpload = async(req,res)=>{
   try{
     const imageUrl = await chatModel.imageUpload(req.file)
@@ -19,7 +20,7 @@ const imageUpload = async(req,res)=>{
     res.status(500).json({error:'图片未能成功上传'})
   }
 }
-
+// 留言表单的处理
 const formUpload = async (req,res)=>{
   try{  
     await chatModel.FormUpload(req.body)
@@ -31,6 +32,7 @@ const formUpload = async (req,res)=>{
   }
 }
 
+// 获取指定留言的内容
 const getChatInfo = async(req,res)=>{
   const chatId = req.params.chatId
   try{
@@ -42,6 +44,7 @@ const getChatInfo = async(req,res)=>{
 
   }
 }
+// 获取指定留言下的全部评论信息
 const getChatCommentInfo = async(req,res)=>{
   const chatId = req.params.chatId
 
@@ -55,6 +58,7 @@ const getChatCommentInfo = async(req,res)=>{
   }
 
 }
+// 发送对应留言下的评论的表单
 const postChatComment = async(req,res)=>{
   try{
     await chatModel.postChatComment(req.body)

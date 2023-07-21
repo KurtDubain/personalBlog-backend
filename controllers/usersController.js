@@ -12,7 +12,7 @@ const getusersByName = async (req, res) => {
     res.status(500).json({ error: '未能成功获取用户信息' });
   }
 };
-
+// 确认用户是否成功登录
 const makeUserLogin = async(req,res)=>{
   try {
     const formData = req.body; // 获取表单数据

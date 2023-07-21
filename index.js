@@ -5,6 +5,7 @@ const path = require('path')
 //导入解析包和express框架
 const app = express();
 
+// 用于解析JSON和其他格式的信息
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(bodyParser.json());
 

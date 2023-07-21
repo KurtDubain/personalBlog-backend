@@ -1,6 +1,6 @@
 const db = require('../config/dbConfig');
 const moment = require('moment');
-//获取全部留言的操作
+//根据用户姓名获取用户信息
 const getusersByName = (username) => {
   return new Promise((resolve, reject) => {
     //SQL语句查询全部留言
@@ -28,10 +28,11 @@ const getusersByName = (username) => {
       });
   });
 };
-
+// 确认用户是否存在，实现用户的登录或者注册
 const makeUserLogin = (FormData)=>{
   return new Promise((resolve, reject) => {
     try {
+      // 首先进行查找，根据是否存在结果，来判断用户是否存在
       const userQuery = 'SELECT id, level, comment_count, like_count, created_at FROM users WHERE username=? AND account = ?';
       const userParams = [FormData.username, FormData.account];
       db.promise().query(userQuery, userParams)
@@ -39,7 +40,7 @@ const makeUserLogin = (FormData)=>{
           if (userRows.length > 0) {
             resolve(true)
           } else {
-            
+            // 若用户名或账户存在其一且不对应，则失败；否则注册新账号
             const usernameQuery = 'SELECT EXISTS(SELECT 1 FROM users WHERE username = ?) AS UsernameExistValue'
             const accountQuery ='SELECT EXISTS(SELECT 1 FROM users WHERE account = ?) AS AccountExistValue'
             const accountPromise = db.promise().query(accountQuery, [FormData.account]);
@@ -52,6 +53,7 @@ const makeUserLogin = (FormData)=>{
                 if(usernameExist||accountExist){
                   throw new Error('用户名与账户不匹配')
                 }else{
+                  // 创建新用户
                   const createUserQuery = 'INSERT INTO users (username, account, like_count, comment_count, level, created_at) VALUES (?, ?, ?, ?, ?, ?)';
                   const createUserParams = [FormData.username, FormData.account, 1, 1, 1, new Date()];
       

@@ -5,13 +5,14 @@ const { query } = require('express');
 const insertCommentForm = (formData) => {
   return new Promise((resolve, reject) => {
     try {
+      // 根据用户结果的检索，来判断用户是否存在
       const userQuery = 'SELECT id, level, comment_count, like_count, created_at FROM users WHERE username=? AND account = ?';
       const userParams = [formData.username, formData.account];
       let userId = 0
       let comments = 0
       db.promise().query(userQuery, userParams)
         .then(([userRows]) => {
-
+          // 若存在，则成功登录，并返回数据
           if (userRows.length > 0) {
             userId = userRows[0].id;
             comments = userRows[0].comment_count + 1;
@@ -21,7 +22,7 @@ const insertCommentForm = (formData) => {
 
             return db.promise().query(updateUserQuery, updateUserParams);
           } else {
-            
+            // 若不存在，则判断是否是输入错误还是未注册的新账号，来判断是否要抛出错误还是创建新用户
             const usernameQuery = 'SELECT EXISTS(SELECT 1 FROM users WHERE username = ?) AS UsernameExistValue'
             const accountQuery ='SELECT EXISTS(SELECT 1 FROM users WHERE account = ?) AS AccountExistValue'
             const accountPromise = db.promise().query(accountQuery, [formData.account]);
@@ -47,6 +48,7 @@ const insertCommentForm = (formData) => {
           }
         })
         .then(() => {
+          // 在用户逻辑执行成功后，也就是登录成功后，执行评论的插入
           const insertCommentQuery = 'INSERT INTO commenttotal (article_id, content, name, account, likes, created_Date, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)';
           const insertCommentParams = [
             formData.articleId,

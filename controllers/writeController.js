@@ -2,14 +2,16 @@ const fs = require('fs');
 const path = require('path');
 const writeModel = require('../models/writeModel');
 
+// 执行是否成功保存图片的操作
 const imageUpload = async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: '请选择要上传的图片' });
   }
 
-
   res.status(200).json({ message: '图片上传成功' });
 };
+
+// 保存MD文档文件以及上传文章信息至数据库
 const ContentUpload = async (req, res) => {
   console.log(req.body)
   const { name, content, tags,title } = req.body;

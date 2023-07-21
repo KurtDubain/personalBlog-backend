@@ -1,6 +1,7 @@
 const db = require('../config/dbConfig');
 // const moment = require('moment');
 
+// 将文章信息存入到数据库中
 const postOtherMsg = (otherMsg)=>{
     return new Promise((resolve,reject)=>{
     
