@@ -5,6 +5,7 @@ const path = require('path')
 //导入解析包和express框架
 const app = express();
 
+app.use(bodyParser.urlencoded({extended:true}))
 app.use(bodyParser.json());
 
 //利用cors方式解决跨域问题（本地）
@@ -20,6 +21,7 @@ const articlesRouter = require('./routes/articles');//文章信息
 const chatsRouter = require('./routes/chats');//留言信息
 const commentsRouter = require('./routes/comments')//评论信息
 const usersRouter = require('./routes/users')
+const writeRouter =require('./routes/write')
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
@@ -27,6 +29,7 @@ app.use('/articles', articlesRouter);
 app.use('/chats', chatsRouter);
 app.use('/comments', commentsRouter);
 app.use('/users',usersRouter)
+app.use('/write',writeRouter)
 
 app.listen(3000, () => {
   console.log('端口3000，启动！');
