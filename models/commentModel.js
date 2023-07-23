@@ -49,13 +49,13 @@ const insertCommentForm = (formData) => {
         })
         .then(() => {
           // 在用户逻辑执行成功后，也就是登录成功后，执行评论的插入
-          const insertCommentQuery = 'INSERT INTO commenttotal (article_id, content, name, account, likes, created_Date, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)';
+          const insertCommentQuery = 'INSERT INTO commenttotal (article_id, content, name, account, created_Date, user_id) VALUES (?, ?, ?, ?, ?, ?)';
           const insertCommentParams = [
             formData.articleId,
             formData.content,
             formData.username,
             formData.account,
-            1,
+            
             new Date(),
             userId
           ];
@@ -83,8 +83,20 @@ const getCommentsByArticleId = (articleId) => {
     return new Promise((resolve, reject) => {
       //未使用模板字符串来书写SQL语句，使用参数化形式执行，能够防止SQL注入攻击、提高可读性、方便处理参数类型的转换
       //查询评论表下的各个数据
-      const query = 'SELECT id, content, name, account, likes, created_Date FROM commenttotal WHERE article_id = ?';
-      db.query(query, [articleId], (err, results) => {
+      const query = `
+      SELECT 
+        c.id,
+        c.content,
+        c.name,
+        c.account,
+        COUNT(l.id) AS likes,
+        c.created_Date
+      FROM commenttotal AS c
+      LEFT JOIN commentslikes AS l ON c.id = l.coid
+      WHERE c.article_id = ?
+      GROUP BY c.id;
+    `
+        db.query(query, [articleId], (err, results) => {
         if (err) {
           console.error('指定文章评论获取失败');
           reject(err);

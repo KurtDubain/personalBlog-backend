@@ -7,8 +7,24 @@ const path = require('path');
 const getAllChats = () => {
   return new Promise((resolve, reject) => {
     //SQL语句查询全部留言
-    const query = 'SELECT id, username, date, content, account,likes,views,reply,user_id,imgUrl FROM chats';
-    db.query(query,(err, results) => {
+    const query = `
+    SELECT 
+      c.id,
+      c.username,
+      c.date,
+      c.content,
+      c.views,
+      c.account,
+      COUNT(l.id) AS likes,
+      COUNT(r.id) AS reply,
+      c.user_id,
+      c.imgUrl
+    FROM chats AS c
+    LEFT JOIN chatslikes AS l ON c.id = l.cid
+    LEFT JOIN chatcomments AS r ON c.id = r.cid
+    GROUP BY c.id;
+  `
+      db.query(query,(err, results) => {
       if (err) {
         console.error('所有留言查询失败');
         reject(err)  
@@ -52,9 +68,9 @@ const imageUpload = (imageFile)=>{
 const FormUpload = (chatFrom)=>{
   return new Promise((resolve,reject)=>{
   
-  const query = 'insert into chats (username,date,content,account,likes,views,reply,user_id,imgUrl) values(?,?,?,?,?,?,?,?,?)';
+  const query = 'insert into chats (username,date,content,account,views,user_id,imgUrl) values(?,?,?,?,?,?,?)';
 
-    db.query(query,[chatFrom.username,new Date(),chatFrom.content,chatFrom.account,1,1,0,chatFrom.uid,chatFrom.image], (err, results) => {
+    db.query(query,[chatFrom.username,new Date(),chatFrom.content,chatFrom.account,1,chatFrom.uid,chatFrom.image], (err, results) => {
       if (err) {
         console.error('表单提交失败');
         reject(err);
@@ -68,8 +84,25 @@ const FormUpload = (chatFrom)=>{
 // 获取指定留言的所有信息
 const getChatInfo = (chatId)=>{
   return new Promise((resolve,reject)=>{
-    const query = 'SELECT username, id, account,content, user_id, likes,views,reply,imgUrl, date FROM chats WHERE id = ?';
-    db.query(query, [chatId], (err, results) => {
+    const query = `
+    SELECT 
+      c.id,
+      c.username,
+      c.account,
+      c.content,
+      c.views,
+      c.date,
+      COUNT(l.id) AS likes,
+      COUNT(r.id) AS reply,
+      c.user_id AS uid,
+      c.imgUrl
+    FROM chats AS c
+    LEFT JOIN chatslikes AS l ON c.id = l.cid
+    LEFT JOIN chatcomments AS r ON c.id = r.cid
+    WHERE c.id = ?
+    GROUP BY c.id;
+  `
+      db.query(query, [chatId], (err, results) => {
       if (err) {
         console.error('指定留言查询失败');
         reject(err);
@@ -85,7 +118,7 @@ const getChatInfo = (chatId)=>{
           likes: row.likes,
           views: row.views,
           reply:row.reply,
-          uid:row.user_id,
+          uid:row.uid,
           imgUrl:row.imgUrl
         }));
         resolve(ChatInfo);
@@ -96,13 +129,27 @@ const getChatInfo = (chatId)=>{
 // 获取指定留言下的评论信息
 const getChatCommentInfo = (chatId)=>{
   return new Promise((resolve,reject)=>{
-    const query = 'SELECT chatComments.id, chatComments.uid, chatComments.cid, chatComments.likes, chatComments.created_at, chatComments.content, users.username FROM chatComments LEFT JOIN users ON chatComments.uid = users.id WHERE chatComments.cid = ?';
-    db.query(query, [chatId], (err, results) => {
+    const query = `
+    SELECT 
+      cc.id,
+      cc.uid,
+      cc.cid,
+      cc.content,
+      cc.created_at,
+      COUNT(l.id) AS likes,
+      u.username
+    FROM chatComments AS cc
+    LEFT JOIN chatscommentslikes AS l ON cc.id = l.cid
+    LEFT JOIN users AS u ON cc.uid = u.id
+    WHERE cc.cid = ?
+    GROUP BY cc.id;
+  `
+      db.query(query, [chatId], (err, results) => {
       if (err) {
         console.error('指定文章查询失败');
         reject(err);
       } else {
-        console.log('指定文章查询成功',results);
+        console.log('指定文章查询成功');
         //使用map处理生成数组对象，使用moment生成指定格式
         const ChatCommentInfo = results.map(row => ({
           username:row.username,
@@ -126,8 +173,8 @@ const postChatComment = (commentForm)=>{
     const uidParams = [commentForm.username]
     db.promise().query(uidQuery,uidParams)
       .then(([uidRows])=>{
-        const ChatCommentQuery = 'insert into chatcomments (uid,cid,content,likes,created_at) values(?,?,?,?,?)'
-        const ChatCommentParams = [uidRows[0].id,commentForm.chatId,commentForm.content,1,new Date()]
+        const ChatCommentQuery = 'insert into chatcomments (uid,cid,content,created_at) values(?,?,?,?)'
+        const ChatCommentParams = [uidRows[0].id,commentForm.chatId,commentForm.content,new Date()]
         db.promise().query(ChatCommentQuery,ChatCommentParams)
           .then(()=>{
             resolve('评论插入成功')

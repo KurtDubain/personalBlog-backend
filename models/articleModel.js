@@ -27,26 +27,86 @@ const getAllArticles = () => {
 //获取指定文章信息的操作
 const getArticleById = (articleId) => {
   return new Promise((resolve, reject) => {
-    //获取指定文章的信息
-    const query = 'SELECT title, date, tags, views, `like`, commentsNum FROM articles WHERE id = ?';
-    db.query(query, [articleId], (err, results) => {
-      if (err) {
-        console.error('指定文章查询失败');
-        reject(err);
-      } else {
-        console.log('指定文章查询成功');
-        //使用map处理生成数组对象，使用moment生成指定格式
-        const article = results.map(row => ({
-          tags: row.tags,
-          commentsNum: row.commentsNum,
-          title: row.title,
-          date: moment(row.date).format('YYYY-MM-DD HH:mm'),
-          like: row.like,
-          views: row.views,
-        }));
-        resolve(article);
+    // //获取指定文章的信息
+    // const query = 'SELECT title, date, tags, views, `like`, commentsNum FROM articles WHERE id = ?';
+    // db.query(query, [articleId], (err, results) => {
+    //   if (err) {
+    //     console.error('指定文章查询失败');
+    //     reject(err);
+    //   } else {
+    //     console.log('指定文章查询成功');
+    //     //使用map处理生成数组对象，使用moment生成指定格式
+    //     const article = results.map(row => ({
+    //       tags: row.tags,
+    //       commentsNum: row.commentsNum,
+    //       title: row.title,
+    //       date: moment(row.date).format('YYYY-MM-DD HH:mm'),
+    //       like: row.like,
+    //       views: row.views,
+    //     }));
+    //     resolve(article);
+    //   }
+    // });
+    const articleQuery = 'SELECT title, date, tags, views FROM articles WHERE id = ?'
+    const likesQuery = 'SELECT COUNT(*) as likes FROM articleslikes WHERE aid = ?'
+    const commentsQuery = 'SELECT COUNT(*) as commentsNum FROM commenttotal WHERE article_id = ?'
+
+    Promise.all([
+      new Promise((resolve,reject)=>{
+        db.query(articleQuery,[articleId],(err,results)=>{
+          if(err){
+            console.error(err);   
+            reject(err)
+          }else{
+            const articleInfo = results[0]
+            resolve(articleInfo)
+          }
+       })
+      }),
+      new Promise((resolve, reject) => {
+        db.query(likesQuery, [articleId], (err, results) => {
+          if (err) {
+            console.error('点赞数查询失败');
+            reject(err);
+          } else {
+            console.log('点赞数查询成功');
+          // 提取查询结果中的点赞数
+            const likes = results[0].likes;
+            resolve(likes);
+          }
+        });
+      }),
+
+    // 查询评论数
+      new Promise((resolve, reject) => {
+        db.query(commentsQuery, [articleId], (err, results) => {
+          if (err) {
+            console.error('评论数查询失败');
+            reject(err);
+          } else {
+            console.log('评论数查询成功');
+          // 提取查询结果中的评论数
+            const commentsNum = results[0].commentsNum;
+            resolve(commentsNum);
+          }
+        });
+      })
+    ]).then(([articleInfo,likes,commentsNum])=>{
+      const article = {
+        tags:articleInfo.tags,
+        commentsNum:commentsNum,
+        likes:likes,
+        title:articleInfo.title,
+        date:moment(articleInfo.date).format('YYYY-MM-DD HH:mm'),
+        views:articleInfo.views
+
       }
-    });
+      console.log(article)
+      resolve(article)
+    }).catch((err)=>{
+      console.error('文章信息获取失败',err);
+      reject(err)
+    })
   });
 };
 //获取指定文章前后标题信息
