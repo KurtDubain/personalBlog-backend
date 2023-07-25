@@ -1,6 +1,6 @@
 const db = require('../config/dbConfig')
 const moment = require('moment');
-const { query } = require('express');
+// const { query } = require('express');
 //插入评论表单操作
 const insertCommentForm = (formData) => {
   return new Promise((resolve, reject) => {
