@@ -121,7 +121,16 @@ const getChatInfo = (chatId)=>{
           uid:row.uid,
           imgUrl:row.imgUrl
         }));
-        resolve(ChatInfo);
+        // resolve(ChatInfo);
+        const updateViewsQuery = 'update chats set views = ? where id = ? '
+        db.query(updateViewsQuery,[ChatInfo[0].views+1,chatId],(err,results)=>{
+          if(err){
+            console.error('更新浏览量失败',err);
+            reject(err)
+          }else{
+            resolve(ChatInfo)
+          }
+        })
       }
     });
   })

@@ -101,8 +101,16 @@ const getArticleById = (articleId) => {
         views:articleInfo.views
 
       }
-      console.log(article)
-      resolve(article)
+      // console.log(article)
+      const updateViewsQuery = 'UPDATE articles SET views = ? WHERE id = ?'
+      db.query(updateViewsQuery,[article.views+1,articleId],(err,results)=>{
+        if(err){
+          console.error('更新文章浏览量失败');
+          reject(err)
+        }else{
+          resolve(article)
+        }
+      })
     }).catch((err)=>{
       console.error('文章信息获取失败',err);
       reject(err)
