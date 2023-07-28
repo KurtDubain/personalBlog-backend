@@ -45,6 +45,7 @@ const makeUserLogin = (FormData)=>{
             const accountQuery ='SELECT EXISTS(SELECT 1 FROM users WHERE account = ?) AS AccountExistValue'
             const accountPromise = db.promise().query(accountQuery, [FormData.account]);
             const usernamePromise = db.promise().query(usernameQuery, [FormData.username]);
+            // 利用PromiseAll方法,实现对昵称和账户的查询,判断是否一一对应
             return Promise.all([accountPromise,usernamePromise])
               .then(([accountResult,usernameResult])=>{
                 const accountExist = accountResult[0][0].AccountExistValue === 1;

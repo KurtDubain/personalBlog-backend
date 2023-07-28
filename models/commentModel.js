@@ -31,7 +31,7 @@ const insertCommentForm = (formData) => {
               .then(([accountResult,usernameResult])=>{
                 const accountExist = accountResult[0][0].AccountExistValue === 1;
                 const usernameExist = usernameResult[0][0].UsernameExistValue === 1;
-
+                // 当账户和昵称存在但不对应的情况下，抛出错误
                 if(usernameExist||accountExist){
                   throw new Error('用户名与账户不匹配')
                 }else{

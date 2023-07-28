@@ -47,10 +47,12 @@ const getArticleById = (articleId) => {
     //     resolve(article);
     //   }
     // });
+
+    // 由于更改了数据库表之间的关系，所以此次查询需要调三个表
     const articleQuery = 'SELECT title, date, tags, views FROM articles WHERE id = ?'
     const likesQuery = 'SELECT COUNT(*) as likes FROM articleslikes WHERE aid = ?'
     const commentsQuery = 'SELECT COUNT(*) as commentsNum FROM commenttotal WHERE article_id = ?'
-
+// 使用PromiseAll方法来实现对三个表的查询的依次完成
     Promise.all([
       new Promise((resolve,reject)=>{
         db.query(articleQuery,[articleId],(err,results)=>{
@@ -102,6 +104,7 @@ const getArticleById = (articleId) => {
 
       }
       // console.log(article)
+      // 更新文章浏览数据
       const updateViewsQuery = 'UPDATE articles SET views = ? WHERE id = ?'
       db.query(updateViewsQuery,[article.views+1,articleId],(err,results)=>{
         if(err){

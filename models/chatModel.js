@@ -6,7 +6,7 @@ const path = require('path');
 //获取全部留言的操作
 const getAllChats = () => {
   return new Promise((resolve, reject) => {
-    //SQL语句查询全部留言
+    //SQL语句查询全部留言，联表查询
     const query = `
     SELECT 
       c.id,
@@ -84,6 +84,7 @@ const FormUpload = (chatFrom)=>{
 // 获取指定留言的所有信息
 const getChatInfo = (chatId)=>{
   return new Promise((resolve,reject)=>{
+    // 同样，联表查询，查询喜欢和评论的总数
     const query = `
     SELECT 
       c.id,
@@ -123,6 +124,7 @@ const getChatInfo = (chatId)=>{
         }));
         // resolve(ChatInfo);
         const updateViewsQuery = 'update chats set views = ? where id = ? '
+        // 更新留言的浏览量
         db.query(updateViewsQuery,[ChatInfo[0].views+1,chatId],(err,results)=>{
           if(err){
             console.error('更新浏览量失败',err);
@@ -137,6 +139,7 @@ const getChatInfo = (chatId)=>{
 }
 // 获取指定留言下的评论信息
 const getChatCommentInfo = (chatId)=>{
+  // 联表查询
   return new Promise((resolve,reject)=>{
     const query = `
     SELECT 
@@ -189,6 +192,7 @@ const postChatComment = (commentForm)=>{
             resolve('评论插入成功')
           })
           .catch((error)=>{
+            console.error(error)
             reject('插入评论的时候发生了错误',error)
           })
       })

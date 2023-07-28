@@ -1,8 +1,10 @@
 const likeModel = require('../models/likeModel');
 // const { use } = require('../routes/articles');
 
+// 获取指定种类的制定id的点赞情况
 const getLikesbyItemId = async (req, res) => {
     // console.log(req.params);
+    // 解析参数
     const { likeType, itemId, userId } = req.params;
     try{
         const likesData = await likeModel.getLikesByItemId(likeType, itemId, userId);
@@ -13,6 +15,7 @@ const getLikesbyItemId = async (req, res) => {
     }
   };
   
+//   发送点赞信息，对指定项目进行点赞
   const postLiked = async (req, res) => {
     const { likeType } = req.params;
     const { itemId, userId } = req.body;
@@ -25,6 +28,7 @@ const getLikesbyItemId = async (req, res) => {
     }
   };
   
+//   发送取消点赞信息，对指定项目取消点赞，直接删除
   const postDisliked = async (req, res) => {
     const { likeType } = req.params;
     const { itemId, userId } = req.body;
