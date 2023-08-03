@@ -5,6 +5,7 @@ const moment = require('moment');
 const insertCommentForm = (formData) => {
   return new Promise((resolve, reject) => {
     try {
+      console.log(formData);
       // 根据用户结果的检索，来判断用户是否存在
       const userQuery = 'SELECT id, level, comment_count, like_count, created_at FROM users WHERE username=? AND account = ?';
       const userParams = [formData.username, formData.account];

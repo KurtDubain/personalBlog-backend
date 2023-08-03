@@ -2,6 +2,9 @@ const commentModel = require('../models/commentModel');
 //表单数据处理逻辑
 const submitCommentForm = async (req, res) => {
     try {
+
+      // console.log('测试Vuex',req.body);
+
       const formData = req.body; // 获取表单数据
       //异步等待文章信息处理
       const insertedData = await commentModel.insertCommentForm(formData);

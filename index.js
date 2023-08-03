@@ -24,6 +24,7 @@ const commentsRouter = require('./routes/comments')//评论信息
 const usersRouter = require('./routes/users')
 const writeRouter =require('./routes/write')
 const likesRouter = require('./routes/likes')
+const subscriptionRouter = require('./routes/subscription')
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
@@ -33,6 +34,7 @@ app.use('/comments', commentsRouter);
 app.use('/users',usersRouter)
 app.use('/write',writeRouter)
 app.use('/likes',likesRouter)
+app.use('/subscription',subscriptionRouter)
 
 app.listen(3000, () => {
   console.log('端口3000，启动！');

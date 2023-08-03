@@ -180,7 +180,7 @@ const getChatCommentInfo = (chatId)=>{
 // 指定留言下的评论的表单的插入
 const postChatComment = (commentForm)=>{
   return new Promise((resolve,reject)=>{
-    console.log(commentForm)
+    // console.log(commentForm)
     const uidQuery = 'select id from users where username = ?'
     const uidParams = [commentForm.username]
     db.promise().query(uidQuery,uidParams)
@@ -197,6 +197,7 @@ const postChatComment = (commentForm)=>{
           })
       })
       .catch((error)=>{
+        console.log(error)
         reject('用户查询失败',error)
       })
 
