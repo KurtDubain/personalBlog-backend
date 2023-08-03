@@ -5,11 +5,19 @@ const SubItem = async (req, res) => {
   
   try{
       const subCondition = await subscriptionModel.SubItem(req.body);
-      res.json({ message: '订阅成功',
-                subCondition });
+      res.status(200).json({ success: true, message: subCondition });
+
   }catch(error){
-      console.error('未能正常实现订阅', error);
-      res.status(500).json({ error: '未能正常实现订阅' });
+    if (error.message === '用户未注册') {
+      res.status(400).json({ success: false, message: '用户未注册，请先注册' });
+    } else if (error.message === '该用户已经订阅') {
+      res.status(400).json({ success: false, message: '该用户已经订阅' });
+    } else if (error.message === '用户信息错误') {
+      res.status(400).json({ success: false, message: '用户信息错误，请检查姓名和账户' });
+    } else {
+      // 其他异常，返回通用错误信息
+      res.status(500).json({ success: false, message: '发生了服务器错误' });
+    }
   }
 };
 
@@ -20,8 +28,12 @@ const UnSubItem = async (req, res) => {
       res.json({ message: '取消订阅成功',
                 subCondition });
   }catch(error){
-      console.error('未能正常取消订阅', error);
-      res.status(500).json({ error: '未能正常取消订阅' });
+    if (error.message === '用户未订阅') {
+      res.status(400).json({ success: false, message: '用户未订阅，无法取消订阅' });
+    } else {
+      // 其他异常，返回通用错误信息
+      res.status(500).json({ success: false, message: '发生了服务器错误' });
+    }
   }
 };
 

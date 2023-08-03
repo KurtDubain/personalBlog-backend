@@ -2,9 +2,23 @@
 const db = require('../config/dbConfig')
 // 订阅模型
 
+const isUserRegistered = async (form) => {
+  const selectSql = `SELECT * FROM users WHERE username = ? AND account = ?`;
+  const [rows, fields] = await db.promise().query(selectSql, [form.name, form.account]);
+  return rows.length > 0;
+};
+
+
 const SubItem = (form) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
+      // 判断用户是否已注册
+      const isRegistered = await isUserRegistered(form);
+      if (!isRegistered) {
+        reject(new Error('用户未注册'));
+        return;
+      }
+
       const selectSql = `SELECT * FROM subscriptions WHERE name = ? OR account = ?`;
       db.promise()
         .query(selectSql, [form.name, form.account])
