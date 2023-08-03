@@ -1,52 +1,117 @@
 const db = require('../config/dbConfig');
 const moment = require('moment');
 
-//获取所有文章的数据库操作
-const getAllArticles = () => {
+const ITEMS_PER_PAGE = 3; // 每页显示的文章数目
+const ITEMS_PER_PAGE_BY_TAG = 4
+
+// 获取分页文章
+const getAllArticles = (page) => {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT id, title, date, tags FROM articles';
-    db.query(query, (err, results) => {
-      if (err) {
-        console.error('文章全部检索查询失败');
-        reject(err);
-      } else {
-        console.log('文章全部检索查询成功');
-        //使用map遍历生成数组对象， 使用moment用于解析日期格式
-        const articlesData = results.map(row => ({
-          id: row.id,
-          title: row.title,
-          date: moment(row.date).format('YYYY-MM-DD HH:mm'),
-          tags: row.tags,
-        }));
-        console.log(articlesData)
-        resolve(articlesData);
-      }
-    });
+    try {
+      const offset = (page - 1) * ITEMS_PER_PAGE; // 计算分页偏移量
+      const query = 'SELECT id, title, date, tags FROM articles LIMIT ?, ?'; // 查询分页文章的SQL语句
+      const queryParams = [offset, ITEMS_PER_PAGE]; // 查询参数
+
+      db.query(query, queryParams, (error, results) => {
+        if (error) {
+          console.error('获取分页文章时出现错误:', error);
+          reject(error);
+        } else {
+          // 处理查询结果并返回数据
+          const articlesData = results.map(row => ({
+            id: row.id,
+            title: row.title,
+            date: moment(row.date).format('YYYY-MM-DD HH:mm'),
+            tags: row.tags,
+          }));
+          resolve(articlesData);
+        }
+      });
+    } catch (error) {
+      console.error('获取分页文章时出现错误:', error);
+      reject(error);
+    }
   });
 };
+
+// 获取文章总数
+const getTotalArticles = () => {
+  return new Promise((resolve, reject) => {
+    try {
+      const query = 'SELECT COUNT(*) AS total FROM articles';
+      db.query(query, (error, results) => {
+        if (error) {
+          console.error('获取文章总数时出现错误:', error);
+          reject(error);
+        } else {
+          const totalArticles = results[0].total;
+          resolve(totalArticles);
+        }
+      });
+    } catch (error) {
+      console.error('获取文章总数时出现错误:', error);
+      reject(error);
+    }
+  });
+};
+
+const getArticlesByTag = (page,tag)=>{
+  return new Promise((resolve, reject) => {
+    try {
+      const offset = (page - 1) * ITEMS_PER_PAGE_BY_TAG; // 计算分页偏移量
+      const query = 'SELECT id, title, date, tags FROM articles WHERE tags LIKE ? LIMIT ?, ?'; // 查询分页文章的SQL语句
+      const queryParams = [`%${tag}%`, offset, ITEMS_PER_PAGE_BY_TAG]; // 查询参数
+
+      db.promise()
+        .query(query, queryParams)
+        .then(([results]) => {
+          // 处理查询结果并返回数据
+          const articlesData = results.map(row => ({
+            id: row.id,
+            title: row.title,
+            date: moment(row.date).format('YYYY-MM-DD HH:mm'),
+            tags: row.tags,
+          }));
+          resolve(articlesData);
+        })
+        .catch((error) => {
+          console.error('获取某一种类的分页文章时出现错误:', error);
+          reject(error);
+        });
+    } catch (error) {
+      console.error('获取某一种类的分页文章时出现错误:', error);
+      reject(error);
+    }
+  })
+
+}
+const getTotalArticlesByTag = (tag) =>{
+  return new Promise((resolve, reject) => {
+    try {
+      const query = 'SELECT COUNT(*) AS total FROM articles WHERE tags LIKE ?';
+      const queryParams = [`%${tag}%`];
+
+      db.promise()
+        .query(query, queryParams)
+        .then(([results]) => {
+          const totalArticles = results[0].total;
+          resolve(totalArticles);
+        })
+        .catch((error) => {
+          console.error('获取某一种类的文章数量汇总时出现错误:', error);
+          reject(error);
+        });
+    } catch (error) {
+      console.error('获取某一种类的文章数量汇总时出现错误:', error);
+      reject(error);
+    }
+  });
+}
+
+
 //获取指定文章信息的操作
 const getArticleById = (articleId) => {
   return new Promise((resolve, reject) => {
-    // //获取指定文章的信息
-    // const query = 'SELECT title, date, tags, views, `like`, commentsNum FROM articles WHERE id = ?';
-    // db.query(query, [articleId], (err, results) => {
-    //   if (err) {
-    //     console.error('指定文章查询失败');
-    //     reject(err);
-    //   } else {
-    //     console.log('指定文章查询成功');
-    //     //使用map处理生成数组对象，使用moment生成指定格式
-    //     const article = results.map(row => ({
-    //       tags: row.tags,
-    //       commentsNum: row.commentsNum,
-    //       title: row.title,
-    //       date: moment(row.date).format('YYYY-MM-DD HH:mm'),
-    //       like: row.like,
-    //       views: row.views,
-    //     }));
-    //     resolve(article);
-    //   }
-    // });
 
     // 由于更改了数据库表之间的关系，所以此次查询需要调三个表
     const articleQuery = 'SELECT title, date, tags, views FROM articles WHERE id = ?'
@@ -163,7 +228,13 @@ const getLastId = () => {
 
 module.exports = {
   getAllArticles,
+  getTotalArticles,
   getArticleById,
   getArticleCtlTitles,
-  getLastId
+  getLastId,
+  ITEMS_PER_PAGE,
+  getArticlesByTag,
+  getTotalArticlesByTag
 };
+
+

@@ -2,52 +2,87 @@ const db = require('../config/dbConfig');
 const moment = require('moment');
 const fs = require('fs')
 const path = require('path');
+const ITEMS_PER_PAGE = 3
 
-//获取全部留言的操作
-const getAllChats = () => {
+// 获取全部留言的操作
+const getAllChats = (page) => {
   return new Promise((resolve, reject) => {
-    //SQL语句查询全部留言，联表查询
-    const query = `
-    SELECT 
-      c.id,
-      c.username,
-      c.date,
-      c.content,
-      c.views,
-      c.account,
-      COUNT(l.id) AS likes,
-      COUNT(r.id) AS reply,
-      c.user_id,
-      c.imgUrl
-    FROM chats AS c
-    LEFT JOIN chatslikes AS l ON c.id = l.cid
-    LEFT JOIN chatcomments AS r ON c.id = r.cid
-    GROUP BY c.id;
-  `
-      db.query(query,(err, results) => {
-      if (err) {
-        console.error('所有留言查询失败');
-        reject(err)  
-      } else {
-        console.log('所有留言查询成功');
-        //使用map生成数组对象，并使用moment来修改日期格式
-        const chatsData = results.map(row => ({
-          id: row.id,
-          username: row.username,
-          date: moment(row.date).format('YYYY-MM-DD HH:mm'),
-          content: row.content,
-          account: row.account,
-          likes:row.likes,
-          views:row.views,
-          reply:row.reply,
-          user_id:row.user_id,
-          imgUrl:row.imgUrl
-        }));
-        resolve(chatsData);
-      }
-    });
+    try {
+      const offset = (page - 1) * ITEMS_PER_PAGE; // 计算分页偏移量
+      const query = `
+        SELECT 
+          c.id,
+          c.username,
+          c.date,
+          c.content,
+          c.views,
+          c.account,
+          COUNT(l.id) AS likes,
+          COUNT(r.id) AS reply,
+          c.user_id,
+          c.imgUrl
+        FROM chats AS c
+        LEFT JOIN chatslikes AS l ON c.id = l.cid
+        LEFT JOIN chatcomments AS r ON c.id = r.cid
+        GROUP BY c.id
+        LIMIT ?, ?;`; // 查询分页留言的SQL语句
+
+      const queryParams = [offset, ITEMS_PER_PAGE]; // 查询参数
+
+      db.query(query, queryParams, (error, results) => {
+        if (error) {
+          console.error('获取分页留言时出现错误:', error);
+          reject(err);
+        } else {
+          // 处理查询结果并返回数据
+          const chatsData = results.map(row => ({
+            id: row.id,
+            username: row.username,
+            date: moment(row.date).format('YYYY-MM-DD HH:mm'),
+            content: row.content,
+            account: row.account,
+            likes: row.likes,
+            views: row.views,
+            reply: row.reply,
+            user_id: row.user_id,
+            imgUrl: row.imgUrl
+          }));
+
+          resolve(chatsData);
+        }
+      });
+    } catch (error) {
+      console.error('获取分页留言时出现错误:', error);
+      reject(error);
+    }
   });
 };
+
+// 获取全部留言数目
+const getTotalChats = () => {
+  return new Promise((resolve, reject) => {
+    try {
+      const query = 'SELECT COUNT(*) AS total FROM chats;';
+      db.query(query, (err, results) => {
+        if (err) {
+          console.error('获取留言总数时出现错误:', error);
+          reject(err);
+        } else {
+          resolve(results[0].total);
+        }
+      });
+    } catch (error) {
+      console.error('获取留言总数时出现错误:', error);
+      reject(error);
+    }
+  });
+};
+
+module.exports = {
+  getAllChats,
+  getTotalChats,
+};
+
 
 // 保存图片的信息至服务端，并且返回一个Http格式的URL给前端，用于显示
 const imageUpload = (imageFile)=>{
@@ -206,6 +241,7 @@ const postChatComment = (commentForm)=>{
 
 module.exports = {
   getAllChats,
+  getTotalChats,
   FormUpload,
   imageUpload,
   getChatInfo,
