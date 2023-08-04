@@ -1,16 +1,16 @@
 const db = require('../config/dbConfig');
 const moment = require('moment');
 
-const ITEMS_PER_PAGE = 3; // 每页显示的文章数目
-const ITEMS_PER_PAGE_BY_TAG = 4
+// const ITEMS_PER_PAGE = 3; // 每页显示的文章数目
+// const ITEMS_PER_PAGE_BY_TAG = 4
 
 // 获取分页文章
-const getAllArticles = (page) => {
+const getAllArticles = (page, size) => {
   return new Promise((resolve, reject) => {
     try {
-      const offset = (page - 1) * ITEMS_PER_PAGE; // 计算分页偏移量
-      const query = 'SELECT id, title, date, tags FROM articles LIMIT ?, ?'; // 查询分页文章的SQL语句
-      const queryParams = [offset, ITEMS_PER_PAGE]; // 查询参数
+      const offset = (page - 1) * size; // 计算分页偏移量
+      const query = 'SELECT id, title, date, tags FROM articles ORDER BY date DESC LIMIT ?, ?'; // 查询分页文章的SQL语句
+      const queryParams = [offset, Number(size)]; // 查询参数
 
       db.query(query, queryParams, (error, results) => {
         if (error) {
@@ -55,12 +55,12 @@ const getTotalArticles = () => {
   });
 };
 
-const getArticlesByTag = (page,tag)=>{
+const getArticlesByTag = (page,tag,size)=>{
   return new Promise((resolve, reject) => {
     try {
-      const offset = (page - 1) * ITEMS_PER_PAGE_BY_TAG; // 计算分页偏移量
-      const query = 'SELECT id, title, date, tags FROM articles WHERE tags LIKE ? LIMIT ?, ?'; // 查询分页文章的SQL语句
-      const queryParams = [`%${tag}%`, offset, ITEMS_PER_PAGE_BY_TAG]; // 查询参数
+      const offset = (page - 1) * size; // 计算分页偏移量
+      const query = 'SELECT id, title, date, tags FROM articles  WHERE tags LIKE ? ORDER BY date DESC LIMIT ?, ? '; // 查询分页文章的SQL语句
+      const queryParams = [`%${tag}%`, offset, Number(size)]; // 查询参数
 
       db.promise()
         .query(query, queryParams)
@@ -106,6 +106,62 @@ const getTotalArticlesByTag = (tag) =>{
       reject(error);
     }
   });
+}
+
+const getSearchedArticles = (keyword, page, size)=>{
+  return new Promise((resolve,reject)=>{
+    try{
+      const offset = (page - 1) * size 
+      const query = `
+      select id, title, date, tags From articles 
+      where title Like ? or tags like ?
+      ORDER BY date DESC
+      limit ? ,?
+      `
+      const queryParams = [`%${keyword}%`,`%${keyword}%`,offset,Number(size)]
+      db.promise()
+        .query(query,queryParams)
+        .then(([results])=>{
+          const articles = results.map((row)=>({
+            id:row.id,
+            title:row.title,
+            date: moment(row.date).format('YYYY-MM-DD HH:mm'),
+            tags:row.tags
+          }))
+          resolve(articles)
+        })
+        .catch((error)=>{
+          console.error('搜索文章时出现错误',error);
+          reject(error)
+        })
+    }catch(error){
+      reject(error)
+    }
+  })
+}
+const getTotalSearchedArticles = ( keyword ) =>{
+  return new Promise((resolve,reject)=>{
+    try{
+      const totalQuery = `
+        select count(*) as total From articles
+        where title like ? or tags like ?
+      `
+      const totalParams = [`%${keyword}%`,`%${keyword}%`]
+      db.promise()
+        .query(totalQuery,totalParams)
+        .then(([totalResults])=>{
+          const totalArticles = totalResults[0].total
+          resolve(totalArticles)
+        })
+        .catch((error)=>{
+          console.log(error);
+          reject(error)
+        })
+    }catch(error){
+      console.error(error);
+      reject(error)
+    }
+  })
 }
 
 
@@ -232,9 +288,10 @@ module.exports = {
   getArticleById,
   getArticleCtlTitles,
   getLastId,
-  ITEMS_PER_PAGE,
   getArticlesByTag,
-  getTotalArticlesByTag
+  getTotalArticlesByTag,
+  getSearchedArticles,
+  getTotalSearchedArticles
 };
 
 

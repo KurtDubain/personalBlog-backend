@@ -4,7 +4,8 @@ const chatModel = require('../models/chatModel');
 const getAllChats = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1
-    const chatsData = await chatModel.getAllChats(page);
+    const size = req.query.size
+    const chatsData = await chatModel.getAllChats(page,size);
     const totalChats = await chatModel.getTotalChats()
     res.json({
       success:true,
@@ -16,6 +17,23 @@ const getAllChats = async (req, res) => {
     res.status(500).json({ error: '未能获取留言信息' });
   }
 };
+
+const getSearchChats = async (req,res) =>{
+  try{
+    const {keyword, page, size} = req.query
+    const chats = await chatModel.getSearchChats(keyword, page, size)
+    const totalChats = await chatModel.getTotalSearchChats(keyword)
+    res.json({
+      success:true,
+      chats,
+      totalChats
+    })
+  }catch(error){
+    console.error(error);
+    res.status(500).json({error:'未能获取搜索留言信息'})
+  }
+}
+
 // 留言表单中图片URL的上传保存
 const imageUpload = async(req,res)=>{
   try{
@@ -81,5 +99,6 @@ module.exports = {
   imageUpload,
   getChatInfo,
   getChatCommentInfo,
-  postChatComment
+  postChatComment,
+  getSearchChats
 };

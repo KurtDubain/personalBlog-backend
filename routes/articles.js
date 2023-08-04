@@ -9,5 +9,6 @@ router.get('/:articleId/content', articlesController.getArticleContent);//获取
 router.get('/:articleId/ctlTitles', articlesController.getArticleCtlTitles);//获取指定文章的前后文章信息
 router.get('/lastId/return', articlesController.getLastId);//获取文章中最后一个文章的id
 router.get('/ByTag/PageCtrl',articlesController.getArticlesByTag)
+router.get('/search/Page',articlesController.getSearchedArticles)
 
 module.exports = router;

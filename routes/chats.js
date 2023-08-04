@@ -17,4 +17,6 @@ router.get('/chatCommentInfo/:chatId',chatsController.getChatCommentInfo)
 // 在留言下发送评论
 router.post('/postChatComment',chatsController.postChatComment)
 
+router.get('/search',chatsController.getSearchChats)
+
 module.exports = router;
