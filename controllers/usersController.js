@@ -1,8 +1,8 @@
 const userModel = require('../models/userModel');
 
-//获取所有留言的逻辑处理
+// 根据用户名获取指定用户
 const getusersByName = async (req, res) => {
-  console.log(req.params)
+  // console.log(req.params)
     const username = req.params.formInlineName
   try {
     const users = await userModel.getusersByName(username);

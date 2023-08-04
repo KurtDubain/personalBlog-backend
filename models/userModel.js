@@ -10,7 +10,7 @@ const getusersByName = (username) => {
           console.error('对应用户登陆信息获取失败');
           reject(err);
         } else {
-          console.log('对应用户登陆信息获取成功');
+          // console.log('对应用户登陆信息获取成功');
           //使用map遍历获取数据，生成一个数组对象，便于前端获取
           const userData = results.map(row => ({
             id: row.id,
@@ -22,7 +22,7 @@ const getusersByName = (username) => {
             //使用moment修改日期格式
             created_at: moment(row.created_at).format('YYYY-MM-DD HH:mm'),
           }));
-          console.log(userData)
+          // console.log(userData)
           resolve(userData);
         }
       });
@@ -64,7 +64,7 @@ const makeUserLogin = (FormData)=>{
           }
         })
         .then(() => {
-          console.log('新用户创建成功')
+          // console.log('新用户创建成功')
           resolve(true)
         })
         .catch(error => {

@@ -3,7 +3,7 @@ const moment = require('moment');
 const fs = require('fs')
 const path = require('path');
 
-// 获取全部留言的操作
+// 获取全部留言数据的操作，进行分页操作
 const getAllChats = (page,size) => {
   return new Promise((resolve, reject) => {
     try {
@@ -28,7 +28,6 @@ const getAllChats = (page,size) => {
         LIMIT ?, ?;`; // 查询分页留言的SQL语句
 
       const queryParams = [offset, Number(size)]; // 查询参数
-
       db.query(query, queryParams, (error, results) => {
         if (error) {
           console.error('获取分页留言时出现错误:', error);
@@ -77,7 +76,7 @@ const getTotalChats = () => {
     }
   });
 };
-
+// 获取当前关键字下的文章数据
 const getSearchChats = (keyword, page, size) => {
   return new Promise((resolve, reject) => {
     try {
@@ -105,7 +104,7 @@ const getSearchChats = (keyword, page, size) => {
       `;
 
       const queryParams = [`%${keyword}%`,`%${keyword}%`, offset,  Number(size)];
-
+      // 根据用户名和文章内容进行模糊搜索
       db.query(query, queryParams, (error, results) => {
         if (error) {
           console.error('获取搜索留言时出现错误:', error);
@@ -133,7 +132,7 @@ const getSearchChats = (keyword, page, size) => {
     }
   });
 };
-
+// 获取当前关键字下的所有文章
 const getTotalSearchChats = (keyword) => {
   return new Promise((resolve, reject) => {
     try {
@@ -217,7 +216,7 @@ const getChatInfo = (chatId)=>{
         console.error('指定留言查询失败');
         reject(err);
       } else {
-        console.log('指定文章查询成功',results);
+        // console.log('指定文章查询成功',results);
         //使用map处理生成数组对象，使用moment生成指定格式
         const ChatInfo = results.map(row => ({
           id: row.id,
@@ -270,7 +269,7 @@ const getChatCommentInfo = (chatId)=>{
         console.error('指定文章查询失败');
         reject(err);
       } else {
-        console.log('指定文章查询成功');
+        // console.log('指定文章查询成功');
         //使用map处理生成数组对象，使用moment生成指定格式
         const ChatCommentInfo = results.map(row => ({
           username:row.username,
@@ -306,7 +305,7 @@ const postChatComment = (commentForm)=>{
           })
       })
       .catch((error)=>{
-        console.log(error)
+        console.error(error)
         reject('用户查询失败',error)
       })
 

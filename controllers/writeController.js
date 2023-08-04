@@ -13,13 +13,13 @@ const imageUpload = async (req, res) => {
 
 // 保存MD文档文件以及上传文章信息至数据库
 const ContentUpload = async (req, res) => {
-  console.log(req.body)
+  // console.log(req.body)
   const { name, content, tags,title } = req.body;
 
   try {
     // 将Content上传至指定服务端静态资源文件夹位置
     const contentPath = path.join(__dirname, '../assets/mdStorage', name + '.md');
-    console.log(contentPath,content)
+    // console.log(contentPath,content)
     fs.writeFileSync(contentPath, content);
 
     // 将其他属性（例如设置的文件名、标签等属性）添加到数据库中

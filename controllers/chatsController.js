@@ -3,8 +3,10 @@ const chatModel = require('../models/chatModel');
 //获取所有留言的逻辑处理
 const getAllChats = async (req, res) => {
   try {
+    // 分别获取当前的页面数据和容量数据
     const page = parseInt(req.query.page) || 1
     const size = req.query.size
+    // 获取当前页面的留言数据以及留言总量
     const chatsData = await chatModel.getAllChats(page,size);
     const totalChats = await chatModel.getTotalChats()
     res.json({
@@ -17,10 +19,12 @@ const getAllChats = async (req, res) => {
     res.status(500).json({ error: '未能获取留言信息' });
   }
 };
-
+// 获取搜索状态下的留言数据
 const getSearchChats = async (req,res) =>{
   try{
+    // 获取搜索关键字、页码、页面容量
     const {keyword, page, size} = req.query
+    // 获取当前搜索状态下的留言数据和留言总量
     const chats = await chatModel.getSearchChats(keyword, page, size)
     const totalChats = await chatModel.getTotalSearchChats(keyword)
     res.json({

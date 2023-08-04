@@ -4,7 +4,7 @@ const moment = require('moment');
 // const ITEMS_PER_PAGE = 3; // 每页显示的文章数目
 // const ITEMS_PER_PAGE_BY_TAG = 4
 
-// 获取分页文章
+// 获取分页文章数据
 const getAllArticles = (page, size) => {
   return new Promise((resolve, reject) => {
     try {
@@ -55,6 +55,7 @@ const getTotalArticles = () => {
   });
 };
 
+// 获取指定标签下的文章数据，并且进行分页处理
 const getArticlesByTag = (page,tag,size)=>{
   return new Promise((resolve, reject) => {
     try {
@@ -85,6 +86,7 @@ const getArticlesByTag = (page,tag,size)=>{
   })
 
 }
+// 获取指定标签下的所有文章数量
 const getTotalArticlesByTag = (tag) =>{
   return new Promise((resolve, reject) => {
     try {
@@ -107,7 +109,7 @@ const getTotalArticlesByTag = (tag) =>{
     }
   });
 }
-
+// 获取搜索状态下的文章数据，分页处理
 const getSearchedArticles = (keyword, page, size)=>{
   return new Promise((resolve,reject)=>{
     try{
@@ -119,6 +121,7 @@ const getSearchedArticles = (keyword, page, size)=>{
       limit ? ,?
       `
       const queryParams = [`%${keyword}%`,`%${keyword}%`,offset,Number(size)]
+      // 根据文章标题和标签进行模糊搜索
       db.promise()
         .query(query,queryParams)
         .then(([results])=>{
@@ -139,6 +142,7 @@ const getSearchedArticles = (keyword, page, size)=>{
     }
   })
 }
+// 获取当前关键字下的文章数量
 const getTotalSearchedArticles = ( keyword ) =>{
   return new Promise((resolve,reject)=>{
     try{
@@ -154,7 +158,7 @@ const getTotalSearchedArticles = ( keyword ) =>{
           resolve(totalArticles)
         })
         .catch((error)=>{
-          console.log(error);
+          // console.log(error);
           reject(error)
         })
     }catch(error){
@@ -192,7 +196,7 @@ const getArticleById = (articleId) => {
             console.error('点赞数查询失败');
             reject(err);
           } else {
-            console.log('点赞数查询成功');
+            // console.log('点赞数查询成功');
           // 提取查询结果中的点赞数
             const likes = results[0].likes;
             resolve(likes);
@@ -207,7 +211,7 @@ const getArticleById = (articleId) => {
             console.error('评论数查询失败');
             reject(err);
           } else {
-            console.log('评论数查询成功');
+            // console.log('评论数查询成功');
           // 提取查询结果中的评论数
             const commentsNum = results[0].commentsNum;
             resolve(commentsNum);
@@ -251,7 +255,7 @@ const getArticleCtlTitles=(articleId)=>{
         console.error('文章前后标题查询失败');
         reject(err);
       } else {
-        console.log('文章前后标题查询成功');
+        // console.log('文章前后标题查询成功');
         //使用map遍历，其中第一个数据是前一个标题，第二个数据是后一个标题，当只收到一个标题的时候（当前为第一个文章），前端自行特殊处理
         const ctlTitles = results.map(row => ({
           title:row.title,
@@ -275,7 +279,7 @@ const getLastId = () => {
       } else {
         //只有一个数据，无须使用map
           const lastId = results[0].id
-          console.log('最后一个文章号检索查询成功',lastId);
+          // console.log('最后一个文章号检索查询成功',lastId);
           resolve(lastId);
       }
     });

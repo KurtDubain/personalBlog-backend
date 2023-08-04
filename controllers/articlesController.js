@@ -2,11 +2,11 @@ const articleModel = require('../models/articleModel');
 const fs = require('fs');
 const path = require('path');
 
-// 获取全部文章
+// 获取全部文章（分页获取）
 const getAllArticles = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1; // 从请求参数中获取当前页码，默认为第一页
-    const size = req.query.size
+    const size = req.query.size // 从请求参数中获取当前文章栏容量
     const articlesData = await articleModel.getAllArticles(page,size); // 调用 model 中的函数获取分页文章数据
     const totalArticles = await articleModel.getTotalArticles(); // 调用 model 中的函数获取文章总数
     const totalPages = Math.ceil(totalArticles / articleModel.ITEMS_PER_PAGE); // 计算总页数
@@ -26,15 +26,15 @@ const getAllArticles = async (req, res) => {
     });
   }
 };
-
+// 获取不同分类下的文章数据
 const getArticlesByTag = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1; // 从请求参数中获取当前页码，默认为第一页
-    const tag = req.query.currentCategory
-    const size = req.query.size
+    const tag = req.query.currentCategory //获取当前的分类标签
+    const size = req.query.size //获取当前的页面容量
     const articlesData = await articleModel.getArticlesByTag(page,tag,size); // 调用 model 中的函数获取分页文章数据
     const totalArticles = await articleModel.getTotalArticlesByTag(tag); // 调用 model 中的函数获取文章总数
-    console.log("分类文章处理成功",articlesData,totalArticles);
+    // console.log("分类文章处理成功",articlesData,totalArticles);
     // 将获取到的数据发送给客户端
     res.json({
       success: true,
@@ -48,12 +48,12 @@ const getArticlesByTag = async (req, res) => {
     });
   }
 };
-
+// 获取搜索状态下的文章数据
 const getSearchedArticles = async (req, res)=>{
   try{
-    const { keyword, page, size} = req.query
-    const articles = await articleModel.getSearchedArticles(keyword, page, size)
-    const totalArticles = await articleModel.getTotalSearchedArticles(keyword)
+    const { keyword, page, size} = req.query //解构获取关键字、当前页码、页面容量信息
+    const articles = await articleModel.getSearchedArticles(keyword, page, size) // 获取当前页面当前搜索关键字的文章数据
+    const totalArticles = await articleModel.getTotalSearchedArticles(keyword) // 获取当前搜索获取的文章总数
     res.json({
       success: true,
       articles,
@@ -89,7 +89,7 @@ const getArticleContent = (req, res) => {
       console.error('未能读取文章内容', error);
       return res.status(500).json({ error: '未能读取文章内容' });
     } else {
-      console.log('文章内容读取成功');
+      // console.log('文章内容读取成功');
       res.send(content);
     }
   });
@@ -109,7 +109,7 @@ const getArticleCtlTitles = async(req,res)=>{
 const getLastId = async(req,res)=>{
   try {
     const lastId = await articleModel.getLastId();
-    console.log('最后一个id查询成功',lastId)
+    // console.log('最后一个id查询成功',lastId)
     res.json(lastId);
   } catch (error) {
     console.error('最后一个标题获取失败:', error);
