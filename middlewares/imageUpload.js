@@ -4,8 +4,9 @@ const path = require('path');
 // 配置存储和文件命名
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, '../assets/imageUpload'); // 设置存储目录
-  },
+    const destinationPath = path.join(__dirname, '../assets/imageUpload'); // 使用绝对路径
+    console.log(destinationPath)
+    cb(null, destinationPath);  },
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`; // 生成唯一的文件名
     const fileExtension = path.extname(file.originalname); // 获取文件扩展名

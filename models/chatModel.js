@@ -161,7 +161,7 @@ const getTotalSearchChats = (keyword) => {
 const imageUpload = (imageFile)=>{
   return new Promise ((resolve,reject)=>{
     const savePath = path.join(__dirname,'../assets/imageUpload',imageFile.filename)
-    const publicUrl = `http://localhost:3000/assets/imageUpload/${imageFile.filename}`
+    const publicUrl = `http://www.dyp02.vip:3000/assets/imageUpload/${imageFile.filename}`
     fs.promises.rename(imageFile.path,savePath)
       .then(()=>{
         resolve(publicUrl)
@@ -258,7 +258,7 @@ const getChatCommentInfo = (chatId)=>{
       cc.created_at,
       COUNT(l.id) AS likes,
       u.username
-    FROM chatComments AS cc
+    FROM chatcomments AS cc
     LEFT JOIN chatscommentslikes AS l ON cc.id = l.cid
     LEFT JOIN users AS u ON cc.uid = u.id
     WHERE cc.cid = ?

@@ -5,6 +5,14 @@ const path = require('path')
 //导入解析包和express框架
 const app = express();
 
+app.use(function (req, res, next) {
+  res.setHeader(
+    'Content-Security-Policy', "default-src 'self' http://www.dyp02.vip; script-src 'self' http://www.dyp02.vip; style-src 'self' http://www.dyp02.vip; font-src 'self' http://www.dyp02.vip; img-src 'self' http://www.dyp02.vip; frame-src 'self' http://www.dyp02.vip; report-uri /report-violation"
+  );
+
+  next();
+});
+
 // 用于解析JSON和其他格式的信息
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(bodyParser.json());
@@ -17,6 +25,9 @@ app.use((req, res, next) => {
   next();
 });
 
+
+
+
 //导入路由管理，并进行注册
 const articlesRouter = require('./routes/articles');//文章信息
 const chatsRouter = require('./routes/chats');//留言信息
@@ -27,6 +38,15 @@ const likesRouter = require('./routes/likes')
 const subscriptionRouter = require('./routes/subscription')
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+// 解决二级页面刷新的404问题
+// app.use(express.static(path.join(__dirname, '..', '..', 'html', 'dist')));
+
+// // 处理前端页面请求
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, '..', '..','html', 'dist', 'index.html'));
+// });
+
 
 app.use('/articles', articlesRouter);
 app.use('/chats', chatsRouter);
