@@ -1,5 +1,6 @@
 //node服务端根目录
 const express = require('express');
+const request = require('request')
 const bodyParser = require('body-parser');
 const path = require('path')
 //导入解析包和express框架
@@ -24,6 +25,11 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   next();
 });
+
+app.get('/proxy',(req,res)=>{
+  const imageUrl = req.query.url
+  request.get(imageUrl).pipe(res)
+})
 
 
 
