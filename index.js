@@ -20,7 +20,7 @@ app.use(bodyParser.json());
 
 //利用cors方式解决跨域问题（本地）
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://www.dyp02.vip');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   next();
@@ -42,6 +42,7 @@ const usersRouter = require('./routes/users')
 const writeRouter =require('./routes/write')
 const likesRouter = require('./routes/likes')
 const subscriptionRouter = require('./routes/subscription')
+const announceRouter = require('./routes/announce')
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
@@ -61,6 +62,8 @@ app.use('/users',usersRouter)
 app.use('/write',writeRouter)
 app.use('/likes',likesRouter)
 app.use('/subscription',subscriptionRouter)
+app.use('/announce',announceRouter)
+
 
 app.listen(3000, () => {
   console.log('端口3000，启动！');
