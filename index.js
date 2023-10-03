@@ -22,14 +22,16 @@ app.use(bodyParser.json());
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // 合并头信息
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   next();
 });
 
-app.get('/proxy',(req,res)=>{
-  const imageUrl = req.query.url
-  request.get(imageUrl).pipe(res)
-})
+
+// app.get('/proxy',(req,res)=>{
+//   const imageUrl = req.query.url
+//   request.get(imageUrl).pipe(res)
+// })
 
 
 
@@ -43,6 +45,7 @@ const writeRouter =require('./routes/write')
 const likesRouter = require('./routes/likes')
 const subscriptionRouter = require('./routes/subscription')
 const announceRouter = require('./routes/announce')
+const imagesRouter = require('./routes/images')
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
@@ -63,6 +66,7 @@ app.use('/write',writeRouter)
 app.use('/likes',likesRouter)
 app.use('/subscription',subscriptionRouter)
 app.use('/announce',announceRouter)
+app.use('/images',imagesRouter)
 
 
 app.listen(3000, () => {

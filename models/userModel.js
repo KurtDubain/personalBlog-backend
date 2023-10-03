@@ -28,6 +28,30 @@ const getusersByName = (username) => {
       });
   });
 };
+const getusersByID = (userID)=>{
+  return new Promise((resolve,reject)=>{
+    const query = 'SELECT id, username, account, comment_count, like_count,level,created_at FROM users where id = ?'
+    db.query(query,[userID],(err,results)=>{
+      if(err){
+        console.error('对应用户登陆信息获取失败')
+        reject(err)
+      }else{
+        const userData = results.map(row => ({
+            id: row.id,
+            username: row.username,
+            account: row.account,
+            comment_count: row.comment_count,
+            like_count: row.like_count,
+            level:row.level,
+            //使用moment修改日期格式
+            created_at: moment(row.created_at).format('YYYY-MM-DD HH:mm'),
+          }));
+          // console.log(userData)
+          resolve(userData)
+      }
+    })
+  })
+}
 // 确认用户是否存在，实现用户的登录或者注册
 const makeUserLogin = (FormData)=>{
   return new Promise((resolve, reject) => {
@@ -81,5 +105,6 @@ const makeUserLogin = (FormData)=>{
 
 module.exports = {
   getusersByName,
-  makeUserLogin
+  makeUserLogin,
+  getusersByID
 };
