@@ -14,8 +14,10 @@ const getusersByName = async (req, res) => {
     res.status(500).json({ error: '未能成功获取用户信息' });
   }
 };
+// 通过ID获取用户信息
 const getusersByID = async(req,res)=>{
   // console.log(req.userData)
+  // 先判断是否携带token信息
   if(req.userData){
     const userData = {
       id: req.userData.userID,
@@ -44,6 +46,7 @@ const getusersByID = async(req,res)=>{
     res.status(500).json({error:'用户信息获取失败'})
   }}
 }
+// 通过用户行为获取token
 const getTokenByFormName = async (req,res)=>{
   const username = req.params.formInlineName
   try{
@@ -52,6 +55,7 @@ const getTokenByFormName = async (req,res)=>{
     // if(!userData.id){
     //   return res.status(404).json({message:'用户未找到'})
     // }
+    // 颁发token，有效期两天
     const token = jwt.sign(userData[0],'dypdypdypdypdypdypdypdypdypdypdypdypdypdypdyp',{expiresIn:'2d'})
     res.json({userID:userData[0].id,token})
   }catch(error){
@@ -73,6 +77,7 @@ const makeUserLogin = async(req,res)=>{
   }
   
 }
+// 验证token有效性，是否允许放行
 const verifyToken = async(req,res)=>{
   try{
     if(req.userData.username==='哈哈'){

@@ -28,6 +28,7 @@ const getusersByName = (username) => {
       });
   });
 };
+// 通过用户ID获取用户信息
 const getusersByID = (userID)=>{
   return new Promise((resolve,reject)=>{
     const query = 'SELECT id, username, account, comment_count, like_count,level,created_at FROM users where id = ?'

@@ -1,5 +1,5 @@
 // middleware/authenticate.js
-
+// 解析token的中间件
 const jwt = require('jsonwebtoken');
 
 const tokenDeal = (req, res, next) => {
