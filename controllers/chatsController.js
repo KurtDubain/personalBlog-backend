@@ -1,8 +1,9 @@
 const chatModel = require('../models/chatModel');
 const fs = require('fs');
 const path = require('path');
-const spark = require('spark-md5');
+const sparkMD5 = require('spark-md5');
 
+const fileMD5Arr = []
 
 //获取所有留言的逻辑处理
 const getAllChats = async (req, res) => {
@@ -101,107 +102,140 @@ const postChatComment = async(req,res)=>{
   }
 }
 
-const uploadChunk = async (req,res)=>{
+const mergeChunks = async (fileType, filename, fileExtension) => {
   try {
-    const {  fileExtension,totalChunks, chunkIndex,fileMD5,fileType,filename } = req.body;
-    const filePath = path.join(__dirname, `../assets/${fileType}Upload`, `${filename}_${chunkIndex}`);
-    const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
-    writeStream.write(req.file.buffer, 'base64');
+    const chunkDir = path.resolve(__dirname, `../assets/chunkDeal`);
+    const chunks = await fs.promises.readdir(chunkDir);
 
-    if (parseInt(chunkIndex, 10) === parseInt(totalChunks, 10) ) {
-      writeStream.end();
-      
-      const url = await mergeChunks(filename, totalChunks, fileType, fileMD5,fileExtension);
-      res.json({ success: true, url });
-    } else {
-      res.json({ success: true });
+    // 按照索引排序分片
+    chunks.sort((a, b) => a - b);
+
+    // 验证分片的MD5
+    const valid = await validateChunksMD5(chunkDir, chunks, fileMD5Arr);
+    if (!valid) {
+      throw new Error('分片MD5验证失败');
     }
-  } catch (error) {
-    console.error('分片上传失败', error);
-    res.json({ success: false, message: '分片上传失败' });
-  }
+    const filePath = path.resolve(__dirname, `../assets/${fileType}Upload/${filename}.${fileExtension}`);
+    
+    const writeStream = fs.createWriteStream(filePath);
 
-}
-// 合并分片并返回文件URL
-// const mergeChunks = async (filename, totalChunks, type, clientMD5,fileExtension) => {
-//   try {
-//     console.log(totalChunks)
-//     if(totalChunks==1){
-//       console.log(`执行了他`)
-//       const oldChunkPath = path.join(__dirname, `../assets/${type}Upload`, `${filename}_1`);
-//       const newFilePath = path.join(__dirname, `../assets/${type}Upload`, `${filename}.${fileExtension}`);
-//       await fs.promises.rename(oldChunkPath, newFilePath);
-//     }else{
-//       console.log(`哈哈哈哈哈`)
-//       const filePath = path.join(__dirname, `../assets/${type}Upload`, `${filename}.${fileExtension}`);
-//       const writeStream = fs.createWriteStream(filePath);
-
-//       const md5 = new spark(); // 创建 Spark MD5
-
-//       for (let i = 1; i <= totalChunks; i++) {
-//         const chunkPath = path.join(__dirname, `../assets/${type}Upload`, `${filename}_${i}`);
-//         const chunkData = await fs.promises.readFile(chunkPath);
-//         // console.log(`已经执行了${i}个`)
-//         md5.append(chunkData); // 更新 MD5 值
-
-//         writeStream.write(chunkData);
-//         await fs.promises.unlink(chunkPath); // 删除已合并的分片
-//       }
-
-//       writeStream.end();
-//     }
-
-//     // const md5Value = md5.end(); // 计算最终 MD5 值
-
-//     // if (md5Value !== clientMD5) {
-//     //   throw new Error('MD5 校验失败');
-//     // }
-
-//     const publicUrl = `http://www.dyp02.vip:3000/assets/${type}Upload/${filename}.${fileExtension}`;
-//     return publicUrl;
-//   } catch (error) {
-//     console.error('合并分片失败', error);
-//     throw new Error('合并分片失败');
-//   }
-// };
-const mergeChunks = async (filename, totalChunks, type, clientMD5, fileExtension) => {
-  try {
-    console.log(totalChunks);
-    if (totalChunks === 1) {
-      console.log(`执行了单文件合并`);
-      const oldChunkPath = path.join(__dirname, `../assets/${type}Upload`, `${filename}_1`);
-      const newFilePath = path.join(__dirname, `../assets/${type}Upload`, `${filename}.${fileExtension}`);
-      await fs.promises.rename(oldChunkPath, newFilePath);
-    } else {
-      console.log(`执行多文件合并`);
-      const filePath = path.join(__dirname, `../assets/${type}Upload`, `${filename}.${fileExtension}`);
-      const writeStream = fs.createWriteStream(filePath);
-
-      const md5 = new spark(); // 创建 Spark MD5
-
-      for (let i = 1; i <= totalChunks; i++) {
-        const chunkPath = path.join(__dirname, `../assets/${type}Upload`, `${filename}_${i}`);
-        const chunkData = await fs.promises.readFile(chunkPath);
-        md5.append(chunkData); // 更新 MD5 值
-
-        writeStream.write(chunkData);
-      }
-
-      writeStream.end();
-
-      // 删除分片
-      for (let i = 1; i <= totalChunks; i++) {
-        const chunkPath = path.join(__dirname, `../assets/${type}Upload`, `${filename}_${i}`);
-        await fs.promises.unlink(chunkPath); // 删除已合并的分片
-      }
+    // 合并分片
+    for (const chunk of chunks) {
+      const chunkPath = path.resolve(chunkDir, chunk);
+      const readStream = fs.createReadStream(chunkPath);
+    
+      await new Promise((resolve, reject) => {
+        readStream.pipe(writeStream, { end: false });
+        readStream.on('end', () => {
+          fs.unlinkSync(chunkPath);
+          resolve();
+        });
+        readStream.on('error', (error) => {
+          reject(error);
+        });
+      });
     }
 
-    const publicUrl = `http://www.dyp02.vip:3000/assets/${type}Upload/${filename}.${fileExtension}`;
-    return publicUrl;
+    writeStream.on('finish', () => {
+      fs.rmdirSync(chunkDir);
+      // const url = `http://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`;
+      const url = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
+      return url; // 返回URL
+    });
+
+    const url = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
+    return url; // 返回URL
   } catch (error) {
     console.error('合并分片失败', error);
     throw new Error('合并分片失败');
   }
+};
+
+const uploadChunk = async (req, res) => {
+  try {
+    const { index, totalChunks, fileMD5, fileType, filename, fileExtension } = req.body;
+    const chunkDir = path.resolve(__dirname, `../assets/chunkDeal`);
+    const filePath = path.resolve(__dirname,`../assets/${fileType}Upload/${filename}.${fileExtension}`)
+
+    // const urlLast = `http://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
+    const urlLast = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
+
+    if(fs.existsSync(filePath)){
+      return res.json({
+        success:true,
+        message:'成功实现秒传',
+        isOk:true,
+        url:urlLast
+      })
+    }
+    if (!fs.existsSync(chunkDir)) {
+      fs.mkdirSync(chunkDir);
+    }
+    if(index==0){
+      if(fileMD5Arr[0]===fileMD5){
+        return res.json({ needUpload: true, uploadedChunks: fileMD5Arr.length-1 });
+      }else{
+        fileMD5Arr.length = 0
+      }
+    }
+
+    const chunkPath = path.resolve(chunkDir, `${index}`);
+    fileMD5Arr[index] = fileMD5
+    await fs.promises.writeFile(chunkPath, req.file.buffer, { encoding: 'binary' });
+    if (index == totalChunks - 1) {
+      // 当所有分片上传完毕时，调用合并分片的函数
+      const url = await mergeChunks(fileType, filename, fileExtension);
+
+      fileMD5Arr.length=0
+      return res.json({
+        success:true,
+        isOk:true,
+        url:url
+      })
+    }
+
+    res.json({ success: true, message: '分片上传成功' });
+  } catch (error) {
+    console.error('分片上传失败', error);
+    res.json({ success: false, message: '分片上传失败' });
+  }
+};
+
+
+const validateChunksMD5 = async (chunkDir, chunks, fileMD5s) => {
+  try {
+    for (let i = 0; i < chunks.length; i++) {
+      const chunkPath = path.resolve(chunkDir, chunks[i]);
+      const chunkMD5 = await calculateFileMD5(chunkPath);
+      if (chunkMD5 !== fileMD5s[i]) {
+        return false;
+      }
+    }
+    return true;
+  } catch (error) {
+    console.error('MD5验证失败', error);
+    return false;
+  }
+};
+
+const calculateFileMD5 = (filePath) => {
+  return new Promise((resolve, reject) => {
+    const stream = fs.createReadStream(filePath);
+    const spark = new sparkMD5.ArrayBuffer();
+
+    stream.on('data', (chunk) => {
+      spark.append(chunk);
+    });
+
+    stream.on('end', () => {
+      const md5 = spark.end();
+      resolve(md5);
+    });
+
+    stream.on('error', (error) => {
+      reject(error);
+    });
+  });
 };
 
 
