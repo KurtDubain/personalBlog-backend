@@ -20,7 +20,7 @@ router.get('/chatCommentInfo/:chatId',chatsController.getChatCommentInfo)
 router.post('/postChatComment',chatsController.postChatComment)
 // 获取指定关键字下的留言信息
 router.get('/search',chatsController.getSearchChats)
-//
+//对上传的图片或视频分片的处理
 router.post('/uploadChunk',uploadAndAddName,chatsController.uploadChunk)
 
 

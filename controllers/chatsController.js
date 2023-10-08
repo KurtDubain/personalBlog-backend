@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const sparkMD5 = require('spark-md5');
 
+// 用数组来存储每个分片对应的MD5值
 const fileMD5Arr = []
 
 //获取所有留言的逻辑处理
@@ -102,9 +103,12 @@ const postChatComment = async(req,res)=>{
   }
 }
 
+// 合并分片的方法
 const mergeChunks = async (fileType, filename, fileExtension) => {
   try {
+    // 防止分片的路径
     const chunkDir = path.resolve(__dirname, `../assets/chunkDeal`);
+    // 读取分片
     const chunks = await fs.promises.readdir(chunkDir);
 
     // 按照索引排序分片
@@ -115,11 +119,12 @@ const mergeChunks = async (fileType, filename, fileExtension) => {
     if (!valid) {
       throw new Error('分片MD5验证失败');
     }
+    // 合并之后的文件路径
     const filePath = path.resolve(__dirname, `../assets/${fileType}Upload/${filename}.${fileExtension}`);
-    
+    // 流式输入文件，避免阻塞主线程
     const writeStream = fs.createWriteStream(filePath);
 
-    // 合并分片
+    // 合并分片，依次读取chunk
     for (const chunk of chunks) {
       const chunkPath = path.resolve(chunkDir, chunk);
       const readStream = fs.createReadStream(chunkPath);
@@ -127,6 +132,7 @@ const mergeChunks = async (fileType, filename, fileExtension) => {
       await new Promise((resolve, reject) => {
         readStream.pipe(writeStream, { end: false });
         readStream.on('end', () => {
+          // 读取一个chunk结束之后，删除对应的分片数据
           fs.unlinkSync(chunkPath);
           resolve();
         });
@@ -135,31 +141,36 @@ const mergeChunks = async (fileType, filename, fileExtension) => {
         });
       });
     }
-
+    // 当完成合并之后，删除对应的文件夹（不删也行）
     writeStream.on('finish', () => {
       fs.rmdirSync(chunkDir);
-      // const url = `http://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`;
-      const url = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
+      const url = `https://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`;
+      // const url = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
       return url; // 返回URL
     });
+    // 返回URL
+    // const url = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
+    const url = `https://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`;
 
-    const url = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
     return url; // 返回URL
   } catch (error) {
     console.error('合并分片失败', error);
     throw new Error('合并分片失败');
   }
 };
-
+// 处理上传的分片数据
 const uploadChunk = async (req, res) => {
   try {
     const { index, totalChunks, fileMD5, fileType, filename, fileExtension } = req.body;
+    // 存储分片数据的文件夹
     const chunkDir = path.resolve(__dirname, `../assets/chunkDeal`);
+    // 合并之后的文件路径
     const filePath = path.resolve(__dirname,`../assets/${fileType}Upload/${filename}.${fileExtension}`)
 
-    // const urlLast = `http://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
-    const urlLast = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
+    const urlLast = `https://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
+    // const urlLast = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
 
+    // 实现秒传，如果存在则秒传
     if(fs.existsSync(filePath)){
       return res.json({
         success:true,
@@ -171,6 +182,7 @@ const uploadChunk = async (req, res) => {
     if (!fs.existsSync(chunkDir)) {
       fs.mkdirSync(chunkDir);
     }
+    // 断点续传，如果之前的数组中的fileMD5值和index一样，那就续传，返回已经上传的长度
     if(index==0){
       if(fileMD5Arr[0]===fileMD5){
         return res.json({ needUpload: true, uploadedChunks: fileMD5Arr.length-1 });
@@ -178,7 +190,7 @@ const uploadChunk = async (req, res) => {
         fileMD5Arr.length = 0
       }
     }
-
+    // 存储分片数据
     const chunkPath = path.resolve(chunkDir, `${index}`);
     fileMD5Arr[index] = fileMD5
     await fs.promises.writeFile(chunkPath, req.file.buffer, { encoding: 'binary' });
@@ -201,12 +213,13 @@ const uploadChunk = async (req, res) => {
   }
 };
 
-
+// 验证MD5值是否合规
 const validateChunksMD5 = async (chunkDir, chunks, fileMD5s) => {
   try {
     for (let i = 0; i < chunks.length; i++) {
       const chunkPath = path.resolve(chunkDir, chunks[i]);
       const chunkMD5 = await calculateFileMD5(chunkPath);
+      // 判断是否相等
       if (chunkMD5 !== fileMD5s[i]) {
         return false;
       }
@@ -217,7 +230,7 @@ const validateChunksMD5 = async (chunkDir, chunks, fileMD5s) => {
     return false;
   }
 };
-
+// 计算对应分片数据的MD5值
 const calculateFileMD5 = (filePath) => {
   return new Promise((resolve, reject) => {
     const stream = fs.createReadStream(filePath);
@@ -226,7 +239,7 @@ const calculateFileMD5 = (filePath) => {
     stream.on('data', (chunk) => {
       spark.append(chunk);
     });
-
+    // 结束读取，将生成的MD5值赋值给md5
     stream.on('end', () => {
       const md5 = spark.end();
       resolve(md5);

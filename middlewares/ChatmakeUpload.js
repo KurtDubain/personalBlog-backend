@@ -1,7 +1,7 @@
 const multer = require('multer');
 const upload = multer();
 const path = require('path');
-
+// 处理表单的中间件
 // const addCustomRandomName = (req, res, next) => {
 //     // console.log('表单的数据为',req.body)
 //     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
