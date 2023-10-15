@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const path = require('path')
 //导入解析包和express框架
 const app = express();
+const db = require('./config/dbConfig')
 
 app.use(function (req, res, next) {
   res.setHeader(
@@ -68,12 +69,32 @@ app.use('/subscription',subscriptionRouter)
 app.use('/announce',announceRouter)
 app.use('/images',imagesRouter)
 
+let server 
+function startServer(){
+  server = app.listen(3000,()=>{
+    console.log('端口3000，启动！')
+  })
+}
 
-app.listen(3000, () => {
-  console.log('端口3000，启动！');
-});
+function restartServer(){
+  if(server){
+    server.close(()=>{
+      console.log('服务器已关闭')
+      startServer()
+    })
+  }else{
+    startServer()
+  }
+}
 
-
+startServer()
+db.on('error',(err)=>{
+  console.error('数据库断开了！',err)
+  restartServer()
+})
+// app.listen(3000, () => {
+//   console.log('端口3000，启动！');
+// });
 // const express = require('express')
 // const mysql = require('mysql2')
 // const bodyParser = require('body-parser')
