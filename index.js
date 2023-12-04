@@ -47,6 +47,7 @@ const likesRouter = require('./routes/likes')
 const subscriptionRouter = require('./routes/subscription')
 const announceRouter = require('./routes/announce')
 const imagesRouter = require('./routes/images')
+const systemRouter = require('./routes/system')
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
@@ -68,6 +69,7 @@ app.use('/likes',likesRouter)
 app.use('/subscription',subscriptionRouter)
 app.use('/announce',announceRouter)
 app.use('/images',imagesRouter)
+app.use('/system',systemRouter)
 
 let server 
 function startServer(){
