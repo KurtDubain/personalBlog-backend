@@ -1,12 +1,10 @@
-// controllers/subscriptionController.js
+// 系统数据处理控制器
 const systemModel = require('../models/systemModel');
 
-// 订阅信息的处理
+// 处理访问方法
 const visitThat = async (req, res) => {
   try{
     const { currentDate,ip,userAgent } = req.body
-    // const userIP = req.ip
-    // const userAgent = req.header['user-agent']
     await systemModel.visitThat({ currentDate,ip,userAgent })
     res.status(200).json({success:true})
   }catch(error){
@@ -16,7 +14,7 @@ const visitThat = async (req, res) => {
   }
 };
 
-// 取消订阅的操作
+// 处理获取访问数据的方法
 const getInfor = async (req, res) => {
   try{
       const date = req.query.date

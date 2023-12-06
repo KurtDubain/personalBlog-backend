@@ -1,7 +1,7 @@
-// models/subscriptionModel.js
+// 系统数据数据模型
 const db = require('../config/dbConfig')
-// 订阅模型
 
+// 用于记录访客到访记录
 const visitThat = ({currentDate,ip,userAgent}) => {
   return new Promise(async (resolve, reject) => {
     const insertSql = 'insert into visitor_data (visit_time,ip,user_agent) values(?,?,?)'
@@ -15,7 +15,7 @@ const visitThat = ({currentDate,ip,userAgent}) => {
   });
 };
 
-// 取消订阅操作
+// 用于获取当日访客数据
 const getTodayVisitCount = (date) => {
   return new Promise((resolve, reject) => {
     const selectSql = 'select count(*) as count from visitor_data where date(visit_time) = ?'
@@ -29,6 +29,7 @@ const getTodayVisitCount = (date) => {
   });
 };
 
+// 用于记录全部访客数据
 const getTotalVisitCount = ()=>{
   return new Promise((resolve,reject)=>{
     const selectSql = 'select count(*) as count from visitor_data'
@@ -42,6 +43,7 @@ const getTotalVisitCount = ()=>{
   })
 }
 
+// 用于获取近一周内的访客数据，返回格式为xxxx-xx-xx
 const getWeekData = () =>{
   return new Promise((resolve,reject)=>{
     const selectSql = 'SELECT DATE(visit_time) as day, COUNT(*) as count FROM visitor_data WHERE visit_time >= CURDATE() - INTERVAL 6 DAY GROUP BY day'
