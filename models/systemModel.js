@@ -6,7 +6,7 @@ const visitThat = ({currentDate,ip,userAgent}) => {
   return new Promise(async (resolve, reject) => {
     const insertSql = 'insert into visitor_data (visit_time,ip,user_agent) values(?,?,?)'
     db.promise()
-      .query(insertSql,[currentDate,ip,userAgent])
+      .query(insertSql,[new Date(),ip,userAgent])
       .then(resolve())
       .catch(error=>{
         console.error(error,'访问信息数据库插入异常');
