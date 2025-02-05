@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path');
 
 // 获取全部留言数据的操作，进行分页操作
-const getAllChats = (page,size) => {
+const getAllChats = (page, size) => {
   return new Promise((resolve, reject) => {
     try {
       const offset = (page - 1) * size; // 计算分页偏移量
@@ -23,6 +23,7 @@ const getAllChats = (page,size) => {
         FROM chats AS c
         LEFT JOIN chatslikes AS l ON c.id = l.cid
         LEFT JOIN chatcomments AS r ON c.id = r.cid
+        WHERE c.id != 29  -- 排除ID为29的留言
         GROUP BY c.id
         ORDER BY c.date DESC
         LIMIT ?, ?;`; // 查询分页留言的SQL语句

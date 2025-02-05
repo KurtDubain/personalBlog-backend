@@ -144,13 +144,13 @@ const mergeChunks = async (fileType, filename, fileExtension) => {
     // 当完成合并之后，删除对应的文件夹（不删也行）
     writeStream.on('finish', () => {
       fs.rmdirSync(chunkDir);
-      // const url = `https://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`;
-      const url = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
+      const url = `https://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`;
+      // const url = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
       return url; // 返回URL
     });
     // 返回URL
-    const url = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
-    // const url = `https://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`;
+    // const url = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
+    const url = `https://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`;
 
     return url; // 返回URL
   } catch (error) {
@@ -167,8 +167,8 @@ const uploadChunk = async (req, res) => {
     // 合并之后的文件路径
     const filePath = path.resolve(__dirname,`../assets/${fileType}Upload/${filename}.${fileExtension}`)
 
-    // const urlLast = `https://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
-    const urlLast = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
+    const urlLast = `https://www.dyp02.vip:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
+    // const urlLast = `http://localhost:3000/assets/${fileType}Upload/${filename}.${fileExtension}`
 
     // 实现秒传，如果存在则秒传
     if(fs.existsSync(filePath)){
